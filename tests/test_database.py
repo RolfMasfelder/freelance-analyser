@@ -5,9 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from src.database import (
-    Base,
-    MatchResult,
-    Project,
     create_tables,
     get_all_projects,
     get_match_results,
@@ -161,7 +158,9 @@ class TestIntegration:
 
     def test_project_with_match(self, session: Session):
         upsert_project(session, SAMPLE_PROJECT)
-        save_match_result(session, 123, 92.0, ["Python", "PostgreSQL"], ["Django"], "Top-Match")
+        save_match_result(
+            session, 123, 92.0, ["Python", "PostgreSQL"], ["Django"], "Top-Match"
+        )
         session.commit()
 
         proj = get_project(session, 123)

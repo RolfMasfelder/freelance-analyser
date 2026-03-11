@@ -49,8 +49,12 @@ def _fuzzy_match(skill: str, candidates: list[str]) -> str | None:
     return None
 
 
-def check_exclusions(cv: CVProfile, project_skills: list[str],
-                     project_description: str, project_industry: str) -> tuple[bool, str]:
+def check_exclusions(
+    cv: CVProfile,
+    project_skills: list[str],
+    project_description: str,
+    project_industry: str,
+) -> tuple[bool, str]:
     """Prüft Ausschlusskriterien.
 
     Returns:
@@ -77,7 +81,9 @@ def check_exclusions(cv: CVProfile, project_skills: list[str],
     return False, ""
 
 
-def match_skills(cv: CVProfile, project_skills: list[str]) -> tuple[list[str], list[str]]:
+def match_skills(
+    cv: CVProfile, project_skills: list[str]
+) -> tuple[list[str], list[str]]:
     """Gleicht CV-Skills mit Projekt-Skills ab.
 
     Returns:
@@ -121,8 +127,13 @@ def find_keywords(cv: CVProfile, description: str) -> list[str]:
     return found
 
 
-def match_project(cv: CVProfile, project_id: int, project_skills: list[str],
-                  project_description: str, project_industry: str) -> MatchDetail:
+def match_project(
+    cv: CVProfile,
+    project_id: int,
+    project_skills: list[str],
+    project_description: str,
+    project_industry: str,
+) -> MatchDetail:
     """Führt den vollständigen Match eines Projekts gegen den CV durch.
 
     Args:
@@ -136,7 +147,9 @@ def match_project(cv: CVProfile, project_id: int, project_skills: list[str],
         MatchDetail mit allen Match-Informationen.
     """
     # Ausschluss prüfen
-    excluded, reason = check_exclusions(cv, project_skills, project_description, project_industry)
+    excluded, reason = check_exclusions(
+        cv, project_skills, project_description, project_industry
+    )
     if excluded:
         logger.debug("Projekt %d ausgeschlossen: %s", project_id, reason)
         return MatchDetail(

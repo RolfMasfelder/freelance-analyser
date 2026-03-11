@@ -46,7 +46,9 @@ def parse_project_html(html: str, url: str = "") -> ProjectDetail:
     description = _get_description(soup)
     company, contact, project_id = _get_body_info(soup)
     skills = _get_skills(soup)
-    location, country, industry, remote, contract_type, start, duration, utilization = _get_header_info(soup)
+    location, country, industry, remote, contract_type, start, duration, utilization = (
+        _get_header_info(soup)
+    )
 
     # Projekt-ID aus URL als Fallback
     if not project_id and url:
@@ -117,10 +119,16 @@ def _get_skills(soup: BeautifulSoup) -> list[str]:
     badges_div = soup.find("div", class_="project-body-badges")
     if not badges_div:
         return []
-    return [span.get_text(strip=True) for span in badges_div.find_all("span") if span.get_text(strip=True)]
+    return [
+        span.get_text(strip=True)
+        for span in badges_div.find_all("span")
+        if span.get_text(strip=True)
+    ]
 
 
-def _get_header_info(soup: BeautifulSoup) -> tuple[str, str, str, str, str, str, str, str]:
+def _get_header_info(
+    soup: BeautifulSoup,
+) -> tuple[str, str, str, str, str, str, str, str]:
     """Extrahiert Ort, Land, Branche, Remote, Vertragsart, Start, Dauer, Auslastung."""
     location = ""
     country = ""
@@ -133,7 +141,16 @@ def _get_header_info(soup: BeautifulSoup) -> tuple[str, str, str, str, str, str,
 
     header = soup.find("div", class_="project-header")
     if not header:
-        return location, country, industry, remote, contract_type, start, duration, utilization
+        return (
+            location,
+            country,
+            industry,
+            remote,
+            contract_type,
+            start,
+            duration,
+            utilization,
+        )
 
     # Branche
     badge = header.find("span", class_="badge")
@@ -166,4 +183,13 @@ def _get_header_info(soup: BeautifulSoup) -> tuple[str, str, str, str, str, str,
         elif not contract_type and "%" not in text and "Start" not in text:
             contract_type = text
 
-    return location, country, industry, remote, contract_type, start, duration, utilization
+    return (
+        location,
+        country,
+        industry,
+        remote,
+        contract_type,
+        start,
+        duration,
+        utilization,
+    )

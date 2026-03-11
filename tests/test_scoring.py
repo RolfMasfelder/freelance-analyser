@@ -57,7 +57,8 @@ def excluded_match():
 class TestScoreProject:
     def test_good_match_high_score(self, cv, good_match):
         scored = score_project(
-            good_match, cv,
+            good_match,
+            cv,
             project_remote="100%",
             project_location="München",
             project_contract="Freiberuflich",
@@ -72,7 +73,8 @@ class TestScoreProject:
 
     def test_poor_match_low_score(self, cv, poor_match):
         scored = score_project(
-            poor_match, cv,
+            poor_match,
+            cv,
             project_remote="0%",
             project_location="Hamburg",
             project_contract="Festanstellung",
@@ -103,7 +105,9 @@ class TestScoreProject:
         assert scored.location_score == 100.0
 
     def test_contract_match(self, cv, good_match):
-        scored = score_project(good_match, cv, project_contract="Freiberuflich / Contracting")
+        scored = score_project(
+            good_match, cv, project_contract="Freiberuflich / Contracting"
+        )
         assert scored.contract_score == 100.0
 
     def test_score_within_range(self, cv, good_match):
@@ -119,15 +123,42 @@ class TestScoreProject:
 class TestRankProjects:
     def test_ranking_order(self):
         projects = [
-            ScoredProject(project_id=1, score=40.0, skill_score=0, keyword_score=0,
-                          remote_score=0, location_score=0, contract_score=0,
-                          matched_skills=[], missing_skills=[], matched_keywords=[]),
-            ScoredProject(project_id=2, score=90.0, skill_score=0, keyword_score=0,
-                          remote_score=0, location_score=0, contract_score=0,
-                          matched_skills=[], missing_skills=[], matched_keywords=[]),
-            ScoredProject(project_id=3, score=65.0, skill_score=0, keyword_score=0,
-                          remote_score=0, location_score=0, contract_score=0,
-                          matched_skills=[], missing_skills=[], matched_keywords=[]),
+            ScoredProject(
+                project_id=1,
+                score=40.0,
+                skill_score=0,
+                keyword_score=0,
+                remote_score=0,
+                location_score=0,
+                contract_score=0,
+                matched_skills=[],
+                missing_skills=[],
+                matched_keywords=[],
+            ),
+            ScoredProject(
+                project_id=2,
+                score=90.0,
+                skill_score=0,
+                keyword_score=0,
+                remote_score=0,
+                location_score=0,
+                contract_score=0,
+                matched_skills=[],
+                missing_skills=[],
+                matched_keywords=[],
+            ),
+            ScoredProject(
+                project_id=3,
+                score=65.0,
+                skill_score=0,
+                keyword_score=0,
+                remote_score=0,
+                location_score=0,
+                contract_score=0,
+                matched_skills=[],
+                missing_skills=[],
+                matched_keywords=[],
+            ),
         ]
         ranked = rank_projects(projects)
         assert ranked[0].project_id == 2

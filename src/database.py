@@ -42,8 +42,16 @@ class Project(Base):
     utilization = Column(String(100), nullable=False, default="")
     skills = Column(JSON, nullable=False, default=list)
     url = Column(String(500), nullable=False, default="")
-    first_seen = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
-    last_seen = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    first_seen = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    last_seen = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 class MatchResult(Base):
@@ -57,7 +65,11 @@ class MatchResult(Base):
     matched_skills = Column(JSON, nullable=False, default=list)
     missing_skills = Column(JSON, nullable=False, default=list)
     notes = Column(Text, nullable=False, default="")
-    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
 
 
 def get_engine(database_url: str):
@@ -120,9 +132,14 @@ def upsert_projects(session: Session, projects: list[dict]) -> list[Project]:
     return results
 
 
-def save_match_result(session: Session, project_id: int, score: float,
-                      matched_skills: list[str], missing_skills: list[str],
-                      notes: str = "") -> MatchResult:
+def save_match_result(
+    session: Session,
+    project_id: int,
+    score: float,
+    matched_skills: list[str],
+    missing_skills: list[str],
+    notes: str = "",
+) -> MatchResult:
     """Speichert ein Match-Ergebnis."""
     result = MatchResult(
         project_id=project_id,
@@ -158,8 +175,5 @@ def get_match_results(session: Session, project_id: int) -> list[MatchResult]:
 def get_top_matches(session: Session, limit: int = 20) -> list[MatchResult]:
     """Holt die Top-N Match-Ergebnisse nach Score."""
     return list(
-        session.query(MatchResult)
-        .order_by(MatchResult.score.desc())
-        .limit(limit)
-        .all()
+        session.query(MatchResult).order_by(MatchResult.score.desc()).limit(limit).all()
     )

@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.cv_manager import CVProfile, load_cv
+from src.cv_manager import load_cv
 
 
 @pytest.fixture()
@@ -104,6 +104,7 @@ class TestLoadCV:
     def test_real_cv_file(self):
         """Integration: Echte CV-Datei laden."""
         from pathlib import Path
+
         cv_path = Path("data/cv.yaml")
         if not cv_path.exists():
             pytest.skip("data/cv.yaml nicht vorhanden")

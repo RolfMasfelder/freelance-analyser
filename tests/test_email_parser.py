@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from src.email_parser import (
-    ProjectEntry,
     _clean_url,
     _decode_quoted_printable,
     _extract_project_id,
@@ -13,7 +12,9 @@ from src.email_parser import (
     parse_mbox_file,
 )
 
-SAMPLE_MBOX = Path("data/raw_emails/Agent_Oracle_Java_Python_PostgreSQL_KI - Anzahl neue Projekte_100.mbox")
+SAMPLE_MBOX = Path(
+    "data/raw_emails/Agent_Oracle_Java_Python_PostgreSQL_KI - Anzahl neue Projekte_100.mbox"
+)
 
 
 class TestDecodeQuotedPrintable:
