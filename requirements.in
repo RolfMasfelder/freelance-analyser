@@ -1,0 +1,36 @@
+# HTTP Client
+httpx
+
+# HTML Parsing
+beautifulsoup4
+lxml
+
+# Browser-Cookie-Extraktion
+browser-cookie3
+
+# Datenbank
+sqlalchemy
+psycopg[binary]
+alembic
+
+# E-Mail
+imapclient
+
+# CLI / Konfiguration
+click
+pydantic
+pydantic-settings
+python-dotenv
+pyyaml
+
+# Matching / NLP
+rapidfuzz
+scikit-learn
+
+# Testing
+pytest
+pytest-cov
+pytest-asyncio
+
+# Entwicklung
+pip-tools

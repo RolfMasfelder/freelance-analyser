@@ -1,0 +1,98 @@
+name: "Rolf Masfelder"
+title: "Diplom-Informatiker (FH) — Geschäftsführer Nector IT GmbH"
+experience_years: 37
+
+# Primäre Skills (hohe Gewichtung) — aus aktuellem Schwerpunkt & jüngsten Projekten
+skills:
+  - Python
+  - PostgreSQL
+  - SQL
+  - PL/SQL
+  - PL/pgSQL
+  - Docker
+  - Linux
+  - Django
+  - Git
+  - CI/CD
+  - REST
+  - Oracle
+  - Java
+  - Agile
+  - Scrum
+
+# Sekundäre Skills (niedrigere Gewichtung)
+skills_secondary:
+  - Kubernetes
+  - Vue
+  - React
+  - Jenkins
+  - Maven
+  - gRPC
+  - protobuf
+  - OpenAPI
+  - Swagger
+  - Playwright
+  - MQTT
+  - TensorFlow
+  - Keras
+  - AWS
+  - XML
+  - XSLT
+  - SQLite
+  - Spring
+  - Spring Boot
+  - Spring Integration
+  - Hibernate
+  - Tomcat
+  - TomEE
+  - JavaScript
+  - Jira
+  - Confluence
+  - Monitoring
+  - Performance Tuning
+  - Datenbankadministration
+  - Shell Scripting
+  - SSH
+  - Raspberry Pi
+  - arc42
+  - req42
+
+# Präferenzen
+preferred_locations:
+  - Andernach
+  - Remote
+preferred_remote: "100%"
+preferred_contract_types:
+  - Freiberuflich
+  - Contracting
+min_duration_months: 3
+
+# Ausschluss-Kriterien (Score = 0)
+exclude_skills:
+  - SAP
+  - ABAP
+  - Cobol
+  - Mainframe
+  - .NET
+exclude_industries: []
+
+# Bonus-Keywords in Projektbeschreibungen
+keywords:
+  - cloud
+  - devops
+  - backend
+  - api
+  - automatisierung
+  - datenbank
+  - data engineering
+  - machine learning
+  - ki
+  - e-rechnung
+  - blockchain
+  - postgresql
+  - python
+  - migration
+  - performance
+  - monitoring
+  - docker
+  - kubernetes

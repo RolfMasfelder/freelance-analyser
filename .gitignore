@@ -1,0 +1,20 @@
+# Freelance-Analyser — Gitignore
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+.env
+*.db
+data/raw_emails/*
+data/cookies/*
+data/projects/*
+!data/raw_emails/.gitkeep
+!data/cookies/.gitkeep
+!data/projects/.gitkeep
+.pytest_cache/
+htmlcov/
+.coverage
