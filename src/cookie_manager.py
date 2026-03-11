@@ -1,7 +1,9 @@
 """Cookie-Management — Browser-Cookies für freelancermap.de auslesen."""
 
+import json
 import logging
 from http.cookiejar import CookieJar
+from pathlib import Path
 
 import browser_cookie3
 import httpx
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 FREELANCERMAP_DOMAIN = "freelancermap.de"
 AUTH_CHECK_URL = "https://www.freelancermap.de/projektboerse.html"
+COOKIE_FILE = Path("data/cookies/freelancermap.json")
 
 
 def get_firefox_cookies(domain: str = FREELANCERMAP_DOMAIN) -> CookieJar:
@@ -78,19 +81,72 @@ def verify_session(cookies: httpx.Cookies | CookieJar | None = None) -> bool:
 def get_authenticated_cookies() -> httpx.Cookies:
     """Liefert verifizierte httpx-Cookies für freelancermap.de.
 
+    Versucht zuerst die Cookie-Datei zu laden (für Container-Betrieb),
+    fällt auf Browser-Cookies zurück (für Host-Betrieb).
+
     Raises:
         RuntimeError: Wenn keine gültige Session gefunden wird.
 
     Returns:
         httpx.Cookies mit gültiger Session.
     """
+    # 1. Cookie-Datei vorhanden? (Container-Modus)
+    if COOKIE_FILE.exists():
+        logger.info("Lade Cookies aus %s", COOKIE_FILE)
+        cookies = load_cookies_from_file(COOKIE_FILE)
+        if verify_session(cookies):
+            return cookies
+        logger.warning("Cookie-Datei vorhanden aber Session ungültig")
+
+    # 2. Browser-Cookies (Host-Modus)
+    try:
+        cj = get_firefox_cookies()
+        cookies = cookiejar_to_httpx(cj)
+        if verify_session(cookies):
+            return cookies
+    except Exception as e:
+        logger.warning("Browser-Cookies nicht verfügbar: %s", e)
+
+    raise RuntimeError(
+        "Keine gültige Session gefunden. "
+        "Im Container: 'python scripts/export_cookies.py' auf dem Host ausführen. "
+        "Auf dem Host: Im Browser bei freelancermap.de einloggen."
+    )
+
+
+def export_cookies_to_file(path: Path = COOKIE_FILE) -> Path:
+    """Exportiert Firefox-Cookies in eine JSON-Datei.
+
+    Zum Ausführen auf dem Host, damit der Container die Cookies nutzen kann.
+
+    Returns:
+        Pfad zur geschriebenen Datei.
+    """
     cj = get_firefox_cookies()
-    cookies = cookiejar_to_httpx(cj)
+    cookies_list = [
+        {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path}
+        for c in cj
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(cookies_list, indent=2), encoding="utf-8")
+    logger.info("%d Cookies nach %s exportiert", len(cookies_list), path)
+    return path
 
-    if not verify_session(cookies):
-        raise RuntimeError(
-            "Firefox-Cookies für freelancermap.de sind ungültig. "
-            "Bitte im Browser einloggen und erneut versuchen."
+
+def load_cookies_from_file(path: Path = COOKIE_FILE) -> httpx.Cookies:
+    """Lädt Cookies aus einer JSON-Datei.
+
+    Returns:
+        httpx.Cookies mit den geladenen Cookies.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    cookies = httpx.Cookies()
+    for entry in data:
+        cookies.set(
+            entry["name"],
+            entry["value"],
+            domain=entry.get("domain", ""),
+            path=entry.get("path", "/"),
         )
-
+    logger.info("%d Cookies aus %s geladen", len(data), path)
     return cookies

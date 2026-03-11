@@ -45,6 +45,9 @@ docker compose exec freelance-analyser python scripts/run_pipeline.py run \
     --cv data/cv.yaml --imap
 
 # Mit Live-Scraping (benötigt gültige Browser-Cookies)
+# VORHER auf dem Host: Cookies exportieren
+python scripts/export_cookies.py
+# DANN im Container:
 docker compose exec freelance-analyser python scripts/run_pipeline.py run \
     --cv data/cv.yaml --imap --scrape
 

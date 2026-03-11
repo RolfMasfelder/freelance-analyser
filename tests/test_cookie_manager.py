@@ -1,5 +1,6 @@
 """Tests für cookie_manager — Unit-Tests mit gemocktem Browser + Live-Tests."""
 
+import json
 from http.cookiejar import CookieJar
 from unittest.mock import MagicMock, patch
 
@@ -8,8 +9,10 @@ import pytest
 
 from src.cookie_manager import (
     cookiejar_to_httpx,
+    export_cookies_to_file,
     get_authenticated_cookies,
     get_firefox_cookies,
+    load_cookies_from_file,
     verify_session,
 )
 
@@ -95,21 +98,58 @@ class TestVerifySession:
 
 
 class TestGetAuthenticatedCookies:
+    @patch("src.cookie_manager.COOKIE_FILE")
     @patch("src.cookie_manager.verify_session", return_value=True)
-    @patch("src.cookie_manager.get_firefox_cookies")
+    @patch("src.cookie_manager.load_cookies_from_file")
+    def test_prefers_cookie_file(self, mock_load, mock_verify, mock_path):
+        mock_path.exists.return_value = True
+        mock_cookies = httpx.Cookies()
+        mock_load.return_value = mock_cookies
+
+        result = get_authenticated_cookies()
+        assert result is mock_cookies
+        mock_load.assert_called_once()
+
+    @patch("src.cookie_manager.COOKIE_FILE")
+    @patch("src.cookie_manager.verify_session", return_value=True)
     @patch("src.cookie_manager.cookiejar_to_httpx")
-    def test_success(self, mock_convert, mock_get, mock_verify):
+    @patch("src.cookie_manager.get_firefox_cookies")
+    def test_fallback_to_browser(self, mock_get, mock_convert, mock_verify, mock_path):
+        mock_path.exists.return_value = False
         mock_cookies = httpx.Cookies()
         mock_convert.return_value = mock_cookies
 
         result = get_authenticated_cookies()
         assert result is mock_cookies
+        mock_get.assert_called_once()
 
-    @patch("src.cookie_manager.verify_session", return_value=False)
-    @patch("src.cookie_manager.get_firefox_cookies")
-    @patch("src.cookie_manager.cookiejar_to_httpx")
-    def test_raises_if_invalid(self, mock_convert, mock_get, mock_verify):
-        mock_convert.return_value = httpx.Cookies()
+    @patch("src.cookie_manager.COOKIE_FILE")
+    @patch(
+        "src.cookie_manager.get_firefox_cookies", side_effect=Exception("no browser")
+    )
+    def test_raises_if_nothing_works(self, mock_get, mock_path):
+        mock_path.exists.return_value = False
 
-        with pytest.raises(RuntimeError, match="ungültig"):
+        with pytest.raises(RuntimeError, match="Keine gültige Session"):
             get_authenticated_cookies()
+
+
+class TestCookieFileRoundtrip:
+    def test_export_and_load(self, tmp_path):
+        cookie_file = tmp_path / "cookies.json"
+        cookie = _make_cookie("PHPSESSID", "abc123")
+
+        with patch("src.cookie_manager.get_firefox_cookies") as mock_get:
+            mock_cj = MagicMock(spec=CookieJar)
+            mock_cj.__iter__ = MagicMock(return_value=iter([cookie]))
+            mock_get.return_value = mock_cj
+
+            path = export_cookies_to_file(cookie_file)
+
+        assert path.exists()
+        data = json.loads(path.read_text())
+        assert len(data) == 1
+        assert data[0]["name"] == "PHPSESSID"
+
+        loaded = load_cookies_from_file(path)
+        assert loaded.get("PHPSESSID") == "abc123"
