@@ -4,7 +4,6 @@ import pytest
 
 from src.cv_manager import CVProfile
 from src.matcher import (
-    MatchDetail,
     check_exclusions,
     find_keywords,
     match_project,
@@ -81,7 +80,9 @@ class TestCheckExclusions:
         assert "sap" in reason.lower()
 
     def test_excluded_industry(self, cv):
-        excluded, reason = check_exclusions(cv, ["Python"], "", "Pharma & Life Sciences")
+        excluded, reason = check_exclusions(
+            cv, ["Python"], "", "Pharma & Life Sciences"
+        )
         assert excluded
         assert "pharma" in reason.lower()
 
@@ -90,7 +91,9 @@ class TestCheckExclusions:
         assert excluded
 
     def test_not_excluded(self, cv):
-        excluded, _ = check_exclusions(cv, ["Python", "Docker"], "Backend-Entwicklung", "IT")
+        excluded, _ = check_exclusions(
+            cv, ["Python", "Docker"], "Backend-Entwicklung", "IT"
+        )
         assert not excluded
 
     def test_empty_exclusions(self):
@@ -101,7 +104,9 @@ class TestCheckExclusions:
 
 class TestFindKeywords:
     def test_keywords_found(self, cv):
-        found = find_keywords(cv, "Wir entwickeln eine Cloud-basierte Backend-API mit DevOps.")
+        found = find_keywords(
+            cv, "Wir entwickeln eine Cloud-basierte Backend-API mit DevOps."
+        )
         assert "backend" in found
         assert "cloud" in found
         assert "devops" in found
@@ -118,7 +123,8 @@ class TestFindKeywords:
 class TestMatchProject:
     def test_full_match(self, cv):
         detail = match_project(
-            cv, project_id=42,
+            cv,
+            project_id=42,
             project_skills=["Python", "Docker", "FastAPI"],
             project_description="Cloud Backend Entwicklung",
             project_industry="IT",
@@ -129,7 +135,8 @@ class TestMatchProject:
 
     def test_excluded_project(self, cv):
         detail = match_project(
-            cv, project_id=99,
+            cv,
+            project_id=99,
             project_skills=["SAP", "ABAP", "Java"],
             project_description="SAP S/4HANA Migration",
             project_industry="Automotive",
@@ -140,7 +147,8 @@ class TestMatchProject:
 
     def test_no_skills_match(self, cv):
         detail = match_project(
-            cv, project_id=77,
+            cv,
+            project_id=77,
             project_skills=["C#", ".NET", "Azure DevOps"],
             project_description="Windows Desktop-App",
             project_industry="Finance",

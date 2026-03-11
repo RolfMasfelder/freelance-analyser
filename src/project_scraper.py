@@ -35,7 +35,9 @@ def scrape_project_page(
     if cookies is None:
         cookies = get_authenticated_cookies()
 
-    with httpx.Client(cookies=cookies, follow_redirects=False, timeout=timeout) as client:
+    with httpx.Client(
+        cookies=cookies, follow_redirects=False, timeout=timeout
+    ) as client:
         resp = client.get(url)
 
     if resp.status_code in (301, 302):
@@ -43,7 +45,9 @@ def scrape_project_page(
         if "login" in location.lower():
             raise RuntimeError(f"Session ungültig — Redirect zu {location}")
         # Normaler Redirect: folgen
-        with httpx.Client(cookies=cookies, follow_redirects=True, timeout=timeout) as client:
+        with httpx.Client(
+            cookies=cookies, follow_redirects=True, timeout=timeout
+        ) as client:
             resp = client.get(url)
 
     resp.raise_for_status()

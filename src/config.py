@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     postgres_user: str = "freelance"
     postgres_password: str = "changeme"
     postgres_db: str = "freelance_analyser"
-    database_url: str = "postgresql+psycopg://freelance:changeme@db:5432/freelance_analyser"
+    database_url: str = (
+        "postgresql+psycopg://freelance:changeme@db:5432/freelance_analyser"
+    )
 
     # IMAP
     imap_host: str = "imap.example.com"

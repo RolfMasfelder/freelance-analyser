@@ -43,7 +43,11 @@ def _calc_skill_score(match: MatchDetail, cv: CVProfile) -> float:
     # Primäre Skills zählen doppelt
     primary_matched = sum(1 for s in match.matched_skills if s in cv.skills)
     secondary_matched = sum(1 for s in match.matched_skills if s in cv.skills_secondary)
-    weighted = (primary_matched * 2.0 + secondary_matched) / (len(cv.skills) * 2.0 + len(cv.skills_secondary)) * 100
+    weighted = (
+        (primary_matched * 2.0 + secondary_matched)
+        / (len(cv.skills) * 2.0 + len(cv.skills_secondary))
+        * 100
+    )
     return min(weighted, 100.0)
 
 
@@ -102,9 +106,13 @@ def _calc_contract_score(cv: CVProfile, project_contract: str) -> float:
     return 25.0
 
 
-def score_project(match: MatchDetail, cv: CVProfile,
-                  project_remote: str = "", project_location: str = "",
-                  project_contract: str = "") -> ScoredProject:
+def score_project(
+    match: MatchDetail,
+    cv: CVProfile,
+    project_remote: str = "",
+    project_location: str = "",
+    project_contract: str = "",
+) -> ScoredProject:
     """Berechnet den Gesamt-Relevanz-Score für ein Projekt.
 
     Args:

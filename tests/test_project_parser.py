@@ -5,9 +5,6 @@ from pathlib import Path
 import pytest
 
 from src.project_parser import (
-    ProjectDetail,
-    _get_skills,
-    _get_title,
     parse_project_html,
 )
 
@@ -93,7 +90,9 @@ class TestParseProjectHtmlUnit:
         assert result.industry == "IT"
 
     def test_url_passthrough(self):
-        result = parse_project_html(self.MINIMAL_HTML, url="https://example.com/nproj/12345.html")
+        result = parse_project_html(
+            self.MINIMAL_HTML, url="https://example.com/nproj/12345.html"
+        )
         assert result.url == "https://example.com/nproj/12345.html"
 
     def test_empty_html(self):
@@ -108,7 +107,9 @@ class TestParseRealHtml:
     @pytest.fixture
     def project(self):
         html = SAMPLE_HTML.read_text(encoding="utf-8")
-        return parse_project_html(html, url="https://www.freelancermap.de/nproj/2977008.html")
+        return parse_project_html(
+            html, url="https://www.freelancermap.de/nproj/2977008.html"
+        )
 
     def test_title(self, project):
         assert "CRM" in project.title

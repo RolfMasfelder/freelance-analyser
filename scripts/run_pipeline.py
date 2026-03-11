@@ -10,7 +10,6 @@ Verwendung:
 """
 
 import logging
-import sys
 from dataclasses import asdict
 from pathlib import Path
 
@@ -47,9 +46,19 @@ def cli():
 
 
 @cli.command()
-@click.option("--cv", "cv_path", required=True, type=click.Path(exists=True), help="Pfad zur CV YAML-Datei.")
-@click.option("--mbox", "mbox_path", type=click.Path(exists=True), help="Pfad zur mbox-Datei.")
-@click.option("--scrape", is_flag=True, help="Projektseiten scrapen (benötigt Cookies).")
+@click.option(
+    "--cv",
+    "cv_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="Pfad zur CV YAML-Datei.",
+)
+@click.option(
+    "--mbox", "mbox_path", type=click.Path(exists=True), help="Pfad zur mbox-Datei."
+)
+@click.option(
+    "--scrape", is_flag=True, help="Projektseiten scrapen (benötigt Cookies)."
+)
 @click.option("--db-url", default=None, help="Database-URL (überschreibt .env).")
 @click.option("--top", default=20, help="Anzahl Top-Ergebnisse.", show_default=True)
 @click.option("--log-level", default="INFO", help="Log-Level.", show_default=True)
@@ -135,7 +144,8 @@ def run(cv_path, mbox_path, scrape, db_url, top, log_level):
                 project_industry=proj.industry,
             )
             scored = score_project(
-                match, cv,
+                match,
+                cv,
                 project_remote=proj.remote,
                 project_location=proj.location,
                 project_contract=proj.contract_type,
@@ -167,14 +177,19 @@ def run(cv_path, mbox_path, scrape, db_url, top, log_level):
 
 
 @cli.command()
-@click.option("--cv", "cv_path", required=True, type=click.Path(exists=True), help="Pfad zur CV YAML-Datei.")
+@click.option(
+    "--cv",
+    "cv_path",
+    required=True,
+    type=click.Path(exists=True),
+    help="Pfad zur CV YAML-Datei.",
+)
 @click.option("--db-url", default=None, help="Database-URL.")
 @click.option("--top", default=20, help="Anzahl Top-Ergebnisse.", show_default=True)
 @click.option("--log-level", default="INFO", help="Log-Level.", show_default=True)
 def rank(cv_path, db_url, top, log_level):
     """Matching & Ranking auf bereits gespeicherte Projekte anwenden."""
     _setup_logging(log_level)
-    logger = logging.getLogger("pipeline")
     settings = Settings()
 
     db_url = db_url or settings.database_url
@@ -199,7 +214,8 @@ def rank(cv_path, db_url, top, log_level):
                 project_industry=proj.industry,
             )
             scored = score_project(
-                match, cv,
+                match,
+                cv,
                 project_remote=proj.remote,
                 project_location=proj.location,
                 project_contract=proj.contract_type,
@@ -227,7 +243,9 @@ def _print_ranking(ranked, all_projects):
 
         click.echo(f"\n  {i:2d}. [{status:>6s}]  {title}")
         if proj:
-            click.echo(f"      Ort: {proj.location} | Remote: {proj.remote} | Vertrag: {proj.contract_type}")
+            click.echo(
+                f"      Ort: {proj.location} | Remote: {proj.remote} | Vertrag: {proj.contract_type}"
+            )
             click.echo(f"      URL: {proj.url}")
         if scored.matched_skills:
             click.echo(f"      Skills ✓: {', '.join(scored.matched_skills)}")

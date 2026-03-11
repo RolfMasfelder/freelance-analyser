@@ -34,7 +34,9 @@ class TestGetFirefoxCookies:
     @patch("src.cookie_manager.browser_cookie3.firefox")
     def test_returns_cookies(self, mock_firefox):
         mock_cj = MagicMock(spec=CookieJar)
-        mock_cj.__iter__ = MagicMock(return_value=iter([_make_cookie("PHPSESSID", "abc123")]))
+        mock_cj.__iter__ = MagicMock(
+            return_value=iter([_make_cookie("PHPSESSID", "abc123")])
+        )
         mock_firefox.return_value = mock_cj
 
         result = get_firefox_cookies()

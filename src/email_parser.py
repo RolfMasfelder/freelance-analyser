@@ -29,7 +29,9 @@ def _decode_quoted_printable(text: str) -> str:
     text = text.replace("=\n", "")
     # QP-Entities dekodieren (=C3=BC → ü etc.)
     try:
-        text = quopri.decodestring(text.encode("ascii", errors="replace")).decode("utf-8", errors="replace")
+        text = quopri.decodestring(text.encode("ascii", errors="replace")).decode(
+            "utf-8", errors="replace"
+        )
     except Exception:
         pass
     return text
@@ -97,7 +99,11 @@ def parse_email_body(body: str) -> list[ProjectEntry]:
             if stripped.startswith("Erstellt:"):
                 created = stripped.removeprefix("Erstellt:").strip()
                 break
-            if stripped and not stripped.startswith("Hallo") and not stripped.startswith("unser Projektagent"):
+            if (
+                stripped
+                and not stripped.startswith("Hallo")
+                and not stripped.startswith("unser Projektagent")
+            ):
                 title_parts.append(stripped)
         title = " ".join(title_parts).strip()
         # Trailing whitespace-Marker entfernen

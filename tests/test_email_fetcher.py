@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.config import Settings
-from src.email_fetcher import RawEmail, _extract_body, fetch_emails, list_folders
+from src.email_fetcher import _extract_body, fetch_emails, list_folders
 
 
 @pytest.fixture
@@ -20,7 +20,9 @@ def settings():
     )
 
 
-def _make_raw_email(subject: str, body: str, sender: str = "noreply@freelancermap.de") -> bytes:
+def _make_raw_email(
+    subject: str, body: str, sender: str = "noreply@freelancermap.de"
+) -> bytes:
     """Erzeugt eine minimale RFC822-E-Mail als bytes."""
     msg = email.mime.text.MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
@@ -43,7 +45,10 @@ class TestExtractBody:
 class TestFetchEmails:
     @patch("src.email_fetcher.IMAPClient")
     def test_fetch_returns_emails(self, mock_imap_cls, settings):
-        raw = _make_raw_email("Neues Projekt", "Python Entwickler gesucht\nhttps://www.freelancermap.de/nproj/123.html")
+        raw = _make_raw_email(
+            "Neues Projekt",
+            "Python Entwickler gesucht\nhttps://www.freelancermap.de/nproj/123.html",
+        )
 
         mock_client = MagicMock()
         mock_imap_cls.return_value.__enter__ = MagicMock(return_value=mock_client)

@@ -13,10 +13,16 @@ from src.project_scraper import (
 
 class TestExtractIdFromUrl:
     def test_valid_url(self):
-        assert _extract_id_from_url("https://www.freelancermap.de/nproj/2977008.html") == "2977008"
+        assert (
+            _extract_id_from_url("https://www.freelancermap.de/nproj/2977008.html")
+            == "2977008"
+        )
 
     def test_with_params(self):
-        assert _extract_id_from_url("https://www.freelancermap.de/nproj/123.html?foo=bar") == "123"
+        assert (
+            _extract_id_from_url("https://www.freelancermap.de/nproj/123.html?foo=bar")
+            == "123"
+        )
 
 
 class TestScrapeProjectPage:
@@ -34,7 +40,9 @@ class TestScrapeProjectPage:
         mock_client_cls.return_value = mock_client
 
         cookies = httpx.Cookies()
-        html = scrape_project_page("https://www.freelancermap.de/nproj/123.html", cookies=cookies)
+        html = scrape_project_page(
+            "https://www.freelancermap.de/nproj/123.html", cookies=cookies
+        )
         assert "Projektseite" in html
 
     @patch("src.project_scraper.httpx.Client")
@@ -51,4 +59,6 @@ class TestScrapeProjectPage:
 
         cookies = httpx.Cookies()
         with pytest.raises(RuntimeError, match="Session ungültig"):
-            scrape_project_page("https://www.freelancermap.de/nproj/123.html", cookies=cookies)
+            scrape_project_page(
+                "https://www.freelancermap.de/nproj/123.html", cookies=cookies
+            )
