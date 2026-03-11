@@ -28,33 +28,34 @@ cp .env.example .env
 # data/cv.yaml mit eigenen Skills/Präferenzen befüllen (siehe data/cv.yaml als Vorlage)
 
 # 4. Container starten
-docker compose up -d db            # PostgreSQL starten
 docker compose build freelance-analyser  # App-Image bauen
+docker compose up -d                     # Alle Container starten
 ```
 
 ## Benutzung
 
-Alle Befehle werden über Docker Compose ausgeführt:
+Alle Befehle werden über Docker Compose ausgeführt (Container muss laufen):
 
 ```bash
 # Hilfe anzeigen
 docker compose exec freelance-analyser python scripts/run_pipeline.py --help
 
-# Komplette Pipeline: mbox parsen → gecachte HTML laden → DB → Match → Rank
+# Neue E-Mails via IMAP abholen → parsen → DB → Match → Rank
 docker compose exec freelance-analyser python scripts/run_pipeline.py run \
-    --cv data/cv.yaml \
-    --mbox data/raw_emails/freelancermap.mbox
+    --cv data/cv.yaml --imap
 
 # Mit Live-Scraping (benötigt gültige Browser-Cookies)
 docker compose exec freelance-analyser python scripts/run_pipeline.py run \
+    --cv data/cv.yaml --imap --scrape
+
+# Alternativ: Lokale mbox-Datei verarbeiten
+docker compose exec freelance-analyser python scripts/run_pipeline.py run \
     --cv data/cv.yaml \
-    --mbox data/raw_emails/freelancermap.mbox \
-    --scrape
+    --mbox "data/raw_emails/meine-mails.mbox"
 
 # Nur Ranking auf bereits gespeicherte Projekte
 docker compose exec freelance-analyser python scripts/run_pipeline.py rank \
-    --cv data/cv.yaml \
-    --top 10
+    --cv data/cv.yaml --top 10
 ```
 
 ## Tests

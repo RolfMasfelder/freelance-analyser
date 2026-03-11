@@ -3,8 +3,9 @@
 
 Verwendung:
     python scripts/run_pipeline.py --help
-    python scripts/run_pipeline.py run --cv data/cv.yaml --mbox data/raw_emails/freelancermap.mbox
-    python scripts/run_pipeline.py run --cv data/cv.yaml --mbox data/raw_emails/freelancermap.mbox --scrape
+    python scripts/run_pipeline.py run --cv data/cv.yaml --imap
+    python scripts/run_pipeline.py run --cv data/cv.yaml --imap --scrape
+    python scripts/run_pipeline.py run --cv data/cv.yaml --mbox data/raw_emails/mails.mbox
     python scripts/run_pipeline.py run --cv data/cv.yaml --db-only
     python scripts/run_pipeline.py rank --cv data/cv.yaml --top 10
 """
@@ -25,7 +26,8 @@ from src.database import (
     save_match_result,
     upsert_project,
 )
-from src.email_parser import parse_mbox_file
+from src.email_fetcher import fetch_emails
+from src.email_parser import parse_email_body, parse_mbox_file
 from src.matcher import match_project
 from src.project_parser import parse_project_html
 from src.scoring import rank_projects, score_project
@@ -56,13 +58,14 @@ def cli():
 @click.option(
     "--mbox", "mbox_path", type=click.Path(exists=True), help="Pfad zur mbox-Datei."
 )
+@click.option("--imap", is_flag=True, help="Neue E-Mails via IMAP abholen.")
 @click.option(
     "--scrape", is_flag=True, help="Projektseiten scrapen (benötigt Cookies)."
 )
 @click.option("--db-url", default=None, help="Database-URL (überschreibt .env).")
 @click.option("--top", default=20, help="Anzahl Top-Ergebnisse.", show_default=True)
 @click.option("--log-level", default="INFO", help="Log-Level.", show_default=True)
-def run(cv_path, mbox_path, scrape, db_url, top, log_level):
+def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
     """Führt die komplette Pipeline aus: Parse → Scrape → DB → Match → Rank."""
     _setup_logging(log_level)
     logger = logging.getLogger("pipeline")
@@ -78,7 +81,15 @@ def run(cv_path, mbox_path, scrape, db_url, top, log_level):
 
     # --- Phase 1: E-Mails parsen ---
     projects_from_email = []
-    if mbox_path:
+    if imap:
+        logger.info("Hole neue E-Mails via IMAP...")
+        raw_emails = fetch_emails(settings=settings, mark_seen=True)
+        logger.info("%d E-Mails abgerufen", len(raw_emails))
+        for raw in raw_emails:
+            entries = parse_email_body(raw.body)
+            projects_from_email.extend(entries)
+        logger.info("%d Projekte aus IMAP-Mails extrahiert", len(projects_from_email))
+    elif mbox_path:
         logger.info("Lese mbox: %s", mbox_path)
         projects_from_email = parse_mbox_file(mbox_path)
         logger.info("%d Projekte aus E-Mails extrahiert", len(projects_from_email))

@@ -1,11 +1,14 @@
 """Tests für scripts/run_pipeline.py — CLI und Pipeline-Integration."""
 
+from unittest.mock import patch
+
 import pytest
 from click.testing import CliRunner
 from sqlalchemy import create_engine
 
 from scripts.run_pipeline import cli
 from src.database import create_tables, get_session_factory, upsert_project
+from src.email_fetcher import RawEmail
 
 
 @pytest.fixture()
@@ -155,6 +158,48 @@ class TestRankCommand:
             (i for i, line in enumerate(lines) if "SAP Berater" in line), -1
         )
         assert python_line < sap_line, "Python-Projekt sollte höher gerankt sein"
+
+
+class TestRunImapCommand:
+    def test_run_imap_no_emails(self, cv_file, db_url):
+        """--imap mit 0 neuen Mails → keine Fehler, 0 Projekte."""
+        runner = CliRunner()
+        with patch("scripts.run_pipeline.fetch_emails", return_value=[]):
+            result = runner.invoke(
+                cli,
+                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+            )
+        assert result.exit_code == 0
+
+    def test_run_imap_with_email(self, cv_file, db_url):
+        """--imap mit einer Mail → Projekte werden extrahiert."""
+        fake_body = (
+            "Hallo Rolf,\n\n"
+            "----------------------------------------------\n"
+            "Python Backend Entwickler (m/w/d)\n"
+            "Erstellt: 11.03.2026\n"
+            "von: Test AG\n"
+            "Ort: München\n"
+            "Vertragsart: Freiberuflich\n"
+            "Remote: 100%\n"
+            "Start: Ab sofort\n"
+            "https://www.freelancermap.de/nproj/9999.html\n"
+            "----------------------------------------------\n"
+        )
+        fake_email = RawEmail(
+            uid=100,
+            subject="Neue Projekte",
+            sender="noreply@freelancermap.de",
+            body=fake_body,
+        )
+        runner = CliRunner()
+        with patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]):
+            result = runner.invoke(
+                cli,
+                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+            )
+        assert result.exit_code == 0
+        assert "Top-" in result.output
 
 
 class TestRunCommand:
