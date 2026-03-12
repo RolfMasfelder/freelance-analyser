@@ -115,6 +115,30 @@ def upsert_project(session: Session, project_data: dict) -> Project:
     return project
 
 
+def ensure_project_exists(session: Session, project_data: dict) -> tuple[Project, bool]:
+    """Stellt sicher, dass ein Projekt in der DB existiert.
+
+    Für neue Projekte: Anlegen mit den übergebenen Daten.
+    Für bestehende Projekte: Nur last_seen aktualisieren (keine Daten überschreiben).
+
+    Returns:
+        Tuple aus (Project, is_new).
+    """
+    project_id = project_data["project_id"]
+    now = datetime.now(timezone.utc)
+
+    existing = session.get(Project, project_id)
+    if existing:
+        existing.last_seen = now
+        logger.debug("Projekt %d existiert bereits, last_seen aktualisiert", project_id)
+        return existing, False
+
+    project = Project(**project_data, first_seen=now, last_seen=now)
+    session.add(project)
+    logger.debug("Projekt %d neu angelegt (aus E-Mail)", project_id)
+    return project, True
+
+
 def upsert_projects(session: Session, projects: list[dict]) -> list[Project]:
     """Speichert mehrere Projekte (Batch-Upsert).
 

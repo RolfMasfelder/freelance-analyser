@@ -20,6 +20,7 @@ from src.config import Settings
 from src.cv_manager import load_cv
 from src.database import (
     create_tables,
+    ensure_project_exists,
     get_all_projects,
     get_engine,
     get_session_factory,
@@ -124,14 +125,39 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
 
     # --- Phase 3: DB speichern ---
     session = session_factory()
-    stored_count = 0
+    new_count = 0
+    updated_count = 0
     try:
+        # 3a: E-Mail-Projekte sicherstellen (neu anlegen oder last_seen updaten)
+        for entry in projects_from_email:
+            email_data = {
+                "project_id": entry.project_id,
+                "title": entry.title,
+                "company": entry.company,
+                "location": entry.location,
+                "contract_type": entry.contract_type,
+                "remote": entry.remote,
+                "start": entry.start,
+                "url": entry.url,
+            }
+            _, is_new = ensure_project_exists(session, email_data)
+            if is_new:
+                new_count += 1
+            else:
+                updated_count += 1
+
+        # 3b: Gescrapte Details updaten (überschreibt mit vollständigen Daten)
         for detail in scraped_details:
             data = asdict(detail)
             upsert_project(session, data)
-            stored_count += 1
+
         session.commit()
-        logger.info("%d Projekte in DB gespeichert", stored_count)
+        logger.info(
+            "%d neue Projekte in DB, %d aktualisiert, %d mit Details",
+            new_count,
+            updated_count,
+            len(scraped_details),
+        )
     except Exception:
         session.rollback()
         logger.exception("Fehler beim DB-Speichern")
