@@ -7,7 +7,12 @@ from click.testing import CliRunner
 from sqlalchemy import create_engine
 
 from scripts.run_pipeline import cli
-from src.database import create_tables, get_session_factory, upsert_project
+from src.database import (
+    create_tables,
+    get_all_projects,
+    get_session_factory,
+    upsert_project,
+)
 from src.email_fetcher import RawEmail
 
 
@@ -200,6 +205,52 @@ class TestRunImapCommand:
             )
         assert result.exit_code == 0
         assert "Top-" in result.output
+
+    def test_run_imap_saves_email_projects_to_db(self, cv_file, db_url):
+        """E-Mail-Projekte ohne HTML werden in DB gespeichert."""
+        fake_body = (
+            "----------------------------------------------\n"
+            "Python Backend Entwickler (m/w/d)\n"
+            "Erstellt: 11.03.2026\n"
+            "von: Test AG\n"
+            "Ort: München\n"
+            "Vertragsart: Freiberuflich\n"
+            "Remote: 100%\n"
+            "Start: Ab sofort\n"
+            "https://www.freelancermap.de/nproj/8888.html\n"
+            "----------------------------------------------\n"
+            "Java Enterprise Berater\n"
+            "Erstellt: 11.03.2026\n"
+            "von: Corp AG\n"
+            "Ort: Frankfurt\n"
+            "Vertragsart: Freiberuflich\n"
+            "Remote: 50%\n"
+            "Start: Q2 2026\n"
+            "https://www.freelancermap.de/nproj/8889.html\n"
+            "----------------------------------------------\n"
+        )
+        fake_email = RawEmail(
+            uid=200,
+            subject="Neue Projekte",
+            sender="noreply@freelancermap.de",
+            body=fake_body,
+        )
+        runner = CliRunner()
+        with patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]):
+            result = runner.invoke(
+                cli,
+                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+            )
+        assert result.exit_code == 0
+        # Projekte müssen in DB gespeichert worden sein
+        engine = create_engine(db_url)
+        session = get_session_factory(engine)()
+        projects = get_all_projects(session)
+        session.close()
+        assert len(projects) == 2
+        ids = {p.project_id for p in projects}
+        assert 8888 in ids
+        assert 8889 in ids
 
 
 class TestRunCommand:

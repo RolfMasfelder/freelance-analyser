@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from src.database import (
     create_tables,
+    ensure_project_exists,
     get_all_projects,
     get_match_results,
     get_project,
@@ -113,6 +114,82 @@ class TestProject:
         session.commit()
         assert len(results) == 3
         assert len(get_all_projects(session)) == 3
+
+
+SAMPLE_EMAIL_PROJECT = {
+    "project_id": 555,
+    "title": "React Frontend Dev",
+    "company": "Web GmbH",
+    "location": "Berlin",
+    "contract_type": "Freiberuflich",
+    "remote": "50%",
+    "start": "Ab sofort",
+    "url": "https://www.freelancermap.de/nproj/555.html",
+}
+
+
+class TestEnsureProjectExists:
+    def test_creates_new_project(self, session: Session):
+        proj, is_new = ensure_project_exists(session, SAMPLE_EMAIL_PROJECT)
+        session.commit()
+        assert is_new is True
+        assert proj.project_id == 555
+        assert proj.title == "React Frontend Dev"
+        assert proj.first_seen is not None
+        assert proj.description == ""  # default für fehlende Felder
+
+    def test_existing_project_not_overwritten(self, session: Session):
+        """Bestehende Projekte behalten ihre Daten, nur last_seen wird aktualisiert."""
+        upsert_project(session, SAMPLE_PROJECT)
+        session.commit()
+        original = get_project(session, 123)
+        original_last_seen = original.last_seen
+
+        email_data = {
+            "project_id": 123,
+            "title": "Anderer Titel",
+            "company": "Andere Firma",
+            "location": "Berlin",
+            "contract_type": "",
+            "remote": "",
+            "start": "",
+            "url": "",
+        }
+        proj, is_new = ensure_project_exists(session, email_data)
+        session.commit()
+
+        assert is_new is False
+        # Originaldaten bleiben erhalten
+        assert proj.title == "Python-Entwickler gesucht"
+        assert proj.description == "Wir suchen einen Python-Entwickler."
+        assert proj.skills == ["Python", "Django", "PostgreSQL"]
+        assert proj.last_seen >= original_last_seen
+
+    def test_new_then_upsert_enriches(self, session: Session):
+        """E-Mail-Projekt anlegen, dann mit gescrapten Details updaten."""
+        ensure_project_exists(session, SAMPLE_EMAIL_PROJECT)
+        session.flush()
+
+        # Scraped detail mit mehr Daten
+        upsert_project(
+            session,
+            {
+                **SAMPLE_EMAIL_PROJECT,
+                "description": "Detaillierte Beschreibung",
+                "contact": "Anna",
+                "country": "DE",
+                "industry": "IT",
+                "duration": "3 Monate",
+                "utilization": "Vollzeit",
+                "skills": ["React", "TypeScript"],
+            },
+        )
+        session.commit()
+
+        proj = get_project(session, 555)
+        assert proj.description == "Detaillierte Beschreibung"
+        assert proj.skills == ["React", "TypeScript"]
+        assert proj.title == "React Frontend Dev"
 
 
 class TestMatchResult:
