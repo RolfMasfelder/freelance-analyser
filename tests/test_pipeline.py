@@ -172,7 +172,7 @@ class TestRunImapCommand:
         with patch("scripts.run_pipeline.fetch_emails", return_value=[]):
             result = runner.invoke(
                 cli,
-                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+                ["run", "--cv", cv_file, "--db-url", db_url],
             )
         assert result.exit_code == 0
 
@@ -201,7 +201,7 @@ class TestRunImapCommand:
         with patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]):
             result = runner.invoke(
                 cli,
-                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+                ["run", "--cv", cv_file, "--db-url", db_url, "--no-scrape"],
             )
         assert result.exit_code == 0
         assert "Top-" in result.output
@@ -239,7 +239,7 @@ class TestRunImapCommand:
         with patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]):
             result = runner.invoke(
                 cli,
-                ["run", "--cv", cv_file, "--db-url", db_url, "--imap"],
+                ["run", "--cv", cv_file, "--db-url", db_url, "--no-scrape"],
             )
         assert result.exit_code == 0
         # Projekte müssen in DB gespeichert worden sein
@@ -252,10 +252,39 @@ class TestRunImapCommand:
         assert 8888 in ids
         assert 8889 in ids
 
+    def test_run_imap_marks_new_projects(self, cv_file, db_url):
+        """Neue Projekte werden mit ★NEU markiert."""
+        fake_body = (
+            "----------------------------------------------\n"
+            "Python Backend Entwickler (m/w/d)\n"
+            "Erstellt: 11.03.2026\n"
+            "von: Test AG\n"
+            "Ort: München\n"
+            "Vertragsart: Freiberuflich\n"
+            "Remote: 100%\n"
+            "Start: Ab sofort\n"
+            "https://www.freelancermap.de/nproj/7777.html\n"
+            "----------------------------------------------\n"
+        )
+        fake_email = RawEmail(
+            uid=300,
+            subject="Neue Projekte",
+            sender="noreply@freelancermap.de",
+            body=fake_body,
+        )
+        runner = CliRunner()
+        with patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]):
+            result = runner.invoke(
+                cli,
+                ["run", "--cv", cv_file, "--db-url", db_url, "--no-scrape"],
+            )
+        assert result.exit_code == 0
+        assert "★NEU" in result.output
+
 
 class TestRunCommand:
     def test_run_without_mbox(self, cv_file, db_url):
-        """Run ohne mbox → nur DB-Matching auf bestehende Daten."""
+        """Run ohne imap/mbox → nur DB-Matching auf bestehende Daten."""
         runner = CliRunner()
         result = runner.invoke(
             cli,
@@ -265,6 +294,8 @@ class TestRunCommand:
                 cv_file,
                 "--db-url",
                 db_url,
+                "--no-imap",
+                "--no-scrape",
             ],
         )
         assert result.exit_code == 0
