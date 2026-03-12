@@ -40,25 +40,22 @@ Alle Befehle werden über Docker Compose ausgeführt (Container muss laufen):
 # Hilfe anzeigen
 docker compose exec freelance-analyser python scripts/run_pipeline.py --help
 
-# Neue E-Mails via IMAP abholen → parsen → DB → Match → Rank
-docker compose exec freelance-analyser python scripts/run_pipeline.py run \
-    --cv data/cv.yaml --imap
+# Neue E-Mails via IMAP abholen → scrapen → DB → Match → Rank (Standard)
+docker compose exec freelance-analyser python scripts/run_pipeline.py run
 
-# Mit Live-Scraping (benötigt gültige Browser-Cookies)
-# VORHER auf dem Host: Cookies exportieren
-python scripts/export_cookies.py
-# DANN im Container:
-docker compose exec freelance-analyser python scripts/run_pipeline.py run \
-    --cv data/cv.yaml --imap --scrape
+# Ohne Live-Scraping (nur E-Mail-Basisdaten + gecachte HTML-Dateien)
+docker compose exec freelance-analyser python scripts/run_pipeline.py run --no-scrape
 
-# Alternativ: Lokale mbox-Datei verarbeiten
+# Mit eigener CV-Datei (Standard: data/cv.yaml)
 docker compose exec freelance-analyser python scripts/run_pipeline.py run \
-    --cv data/cv.yaml \
-    --mbox "data/raw_emails/meine-mails.mbox"
+    --cv data/cv.yaml
+
+# Alternativ: Lokale mbox-Datei verarbeiten (kein IMAP)
+docker compose exec freelance-analyser python scripts/run_pipeline.py run \
+    --no-imap --mbox "data/raw_emails/meine-mails.mbox"
 
 # Nur Ranking auf bereits gespeicherte Projekte
-docker compose exec freelance-analyser python scripts/run_pipeline.py rank \
-    --cv data/cv.yaml --top 10
+docker compose exec freelance-analyser python scripts/run_pipeline.py rank --top 10
 ```
 
 ## Tests
