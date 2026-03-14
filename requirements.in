@@ -27,6 +27,11 @@ pyyaml
 rapidfuzz
 scikit-learn
 
+# Web-UI
+fastapi
+uvicorn[standard]
+jinja2
+
 # Testing
 pytest
 pytest-cov

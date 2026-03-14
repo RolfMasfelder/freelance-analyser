@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
     create_engine,
+    func,
 )
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -142,16 +143,29 @@ def ensure_project_exists(session: Session, project_data: dict) -> tuple[Project
 def upsert_projects(session: Session, projects: list[dict]) -> list[Project]:
     """Speichert mehrere Projekte (Batch-Upsert).
 
-    Args:
-        session: Aktive DB-Session.
-        projects: Liste von Projekt-Dicts.
-
-    Returns:
-        Liste der gespeicherten Project-Objekte.
+    Lädt alle betroffenen Projekte in einem Query, um N+1-Queries zu vermeiden.
     """
+    if not projects:
+        return []
+    ids = [p["project_id"] for p in projects]
+    existing_map = {
+        p.project_id: p
+        for p in session.query(Project).filter(Project.project_id.in_(ids)).all()
+    }
+    now = datetime.now(timezone.utc)
     results = []
     for project_data in projects:
-        results.append(upsert_project(session, project_data))
+        pid = project_data["project_id"]
+        if pid in existing_map:
+            proj = existing_map[pid]
+            for key, value in project_data.items():
+                if key != "project_id":
+                    setattr(proj, key, value)
+            proj.last_seen = now
+        else:
+            proj = Project(**project_data, first_seen=now, last_seen=now)
+            session.add(proj)
+        results.append(proj)
     session.flush()
     return results
 
@@ -197,7 +211,16 @@ def get_match_results(session: Session, project_id: int) -> list[MatchResult]:
 
 
 def get_top_matches(session: Session, limit: int = 20) -> list[MatchResult]:
-    """Holt die Top-N Match-Ergebnisse nach Score."""
+    """Holt die Top-N Match-Ergebnisse nach Score, je Projekt nur das neueste."""
+    subq = (
+        session.query(func.max(MatchResult.id).label("max_id"))
+        .group_by(MatchResult.project_id)
+        .subquery()
+    )
     return list(
-        session.query(MatchResult).order_by(MatchResult.score.desc()).limit(limit).all()
+        session.query(MatchResult)
+        .join(subq, MatchResult.id == subq.c.max_id)
+        .order_by(MatchResult.score.desc())
+        .limit(limit)
+        .all()
     )

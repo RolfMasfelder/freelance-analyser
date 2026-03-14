@@ -1,6 +1,7 @@
 """Projektseiten-Scraper — lädt Detailseiten von freelancermap.de."""
 
 import logging
+import re
 import time
 from pathlib import Path
 
@@ -109,7 +110,7 @@ def scrape_project_pages(
 
             logger.info("[%d/%d] OK: %s", i + 1, len(urls), url)
 
-        except Exception:
+        except (httpx.HTTPError, RuntimeError):
             logger.exception("[%d/%d] Fehler bei %s", i + 1, len(urls), url)
 
     logger.info("Scraping fertig: %d/%d erfolgreich", len(results), len(urls))
@@ -118,7 +119,5 @@ def scrape_project_pages(
 
 def _extract_id_from_url(url: str) -> str:
     """Extrahiert die Projekt-ID aus der URL als String."""
-    import re
-
     match = re.search(r"/nproj/(\d+)\.html", url)
     return match.group(1) if match else url.split("/")[-1]

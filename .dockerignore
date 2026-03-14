@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+data/projects/
+data/raw_emails/
+*.egg-info/
+.pytest_cache/
+docs/

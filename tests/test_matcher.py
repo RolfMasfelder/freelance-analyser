@@ -40,9 +40,8 @@ class TestMatchSkills:
     def test_fuzzy_match(self, cv):
         """Leicht abweichende Schreibweise sollte matchen."""
         matched, _ = match_skills(cv, ["Pythons", "Dockers"])
-        # "Pythons" vs "python" — ratio hängt von rapidfuzz ab
-        # Mindestens einer sollte fuzzy matchen
-        assert len(matched) >= 0  # Nicht crashen
+        # Fuzzy-Matching: "Pythons" ist nah genug an "python"
+        assert "python" in matched
 
     def test_missing_skills(self, cv):
         _, missing = match_skills(cv, ["Python", "Kubernetes", "Terraform"])

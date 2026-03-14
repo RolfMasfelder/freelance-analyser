@@ -1,11 +1,14 @@
 """E-Mail-Parser — extrahiert Projekteinträge und Links aus freelancermap-Mails."""
 
 import email
+import logging
 import mailbox
 import quopri
 import re
 from dataclasses import dataclass
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -32,8 +35,8 @@ def _decode_quoted_printable(text: str) -> str:
         text = quopri.decodestring(text.encode("ascii", errors="replace")).decode(
             "utf-8", errors="replace"
         )
-    except Exception:
-        pass
+    except (UnicodeDecodeError, ValueError):
+        logger.debug("QP-Dekodierung fehlgeschlagen, verwende Original")
     return text
 
 

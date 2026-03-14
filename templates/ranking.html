@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %} — Ranking{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Top-{{ top }} Projekte</h2>
+  <div class="d-flex gap-2">
+    <a href="/?top=20" class="btn btn-sm btn-outline-secondary">Top 20</a>
+    <a href="/?top=50" class="btn btn-sm btn-outline-secondary">Top 50</a>
+    <a href="/?top=100" class="btn btn-sm btn-outline-secondary">Top 100</a>
+  </div>
+</div>
+
+{% if results %}
+<div class="table-responsive">
+  <table class="table table-hover table-sm align-middle bg-white shadow-sm rounded">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Score</th>
+        <th>Titel</th>
+        <th>Standort</th>
+        <th>Remote</th>
+        <th>Vertrag</th>
+        <th class="skills-cell">Skills ✓</th>
+        <th>Gesehen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for match, proj in results %}
+      <tr>
+        <td class="text-muted">{{ loop.index }}</td>
+        <td>
+          {% if match.score >= 70 %}
+            <span class="badge bg-success score-badge">{{ "%.1f"|format(match.score) }}</span>
+          {% elif match.score >= 40 %}
+            <span class="badge bg-warning text-dark score-badge">{{ "%.1f"|format(match.score) }}</span>
+          {% else %}
+            <span class="badge bg-secondary score-badge">{{ "%.1f"|format(match.score) }}</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="/project/{{ proj.project_id }}" class="text-decoration-none fw-semibold">
+            {{ proj.title }}
+          </a>
+        </td>
+        <td class="text-muted small">{{ proj.location }}</td>
+        <td class="text-muted small">{{ proj.remote }}</td>
+        <td class="text-muted small">{{ proj.contract_type }}</td>
+        <td class="skills-cell text-success">
+          {% if match.matched_skills %}
+            {{ match.matched_skills[:4] | join(", ") }}{% if match.matched_skills|length > 4 %} <span class="text-muted">+{{ match.matched_skills|length - 4 }}</span>{% endif %}
+          {% endif %}
+        </td>
+        <td class="text-muted small">
+          {{ proj.first_seen.strftime("%d.%m.%Y") if proj.first_seen else "–" }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+  Keine Ergebnisse. Bitte zuerst die Pipeline ausführen:
+  <code>docker compose exec freelance-analyser python scripts/run_pipeline.py run</code>
+</div>
+{% endif %}
+{% endblock %}

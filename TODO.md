@@ -2,7 +2,7 @@
 
 ## Pipeline-Übersicht
 
-```
+```txt
 E-Mail abholen → Parsen → Links extrahieren → Projektseiten scrapen → Projekte speichern → CV-Matching → Trefferliste
 ```
 
@@ -21,37 +21,34 @@ E-Mail abholen → Parsen → Links extrahieren → Projektseiten scrapen → Pr
 - [x] CLI-Pipeline mit `run` und `rank` Kommandos — `run_pipeline.py`
 - [x] Docker-Container (App + PostgreSQL) — `Dockerfile`, `docker-compose.yml`
 - [x] 120 Tests (alle bestanden)
+- [x] IMAP-Verbindung zu ionos.de (Live-Abruf via `email_fetcher.py`) — `email_fetcher.py`
+- [x] E-Mails automatisch abrufen (nur neue/ungelesene, `UNSEEN`-Filter) — `email_fetcher.py`
+- [x] Bereits verarbeitete E-Mails markieren (`mark_seen=True`) — `email_fetcher.py`
+- [x] Scoring-Gewichtungen gesetzt (Skills 50%, Keywords 15%, Remote 15%, Ort 10%, Vertrag 10%) — `scoring.py`
+- [x] Fuzzy-Matching-Schwellenwert gesetzt (80) — `matcher.py`
+- [x] Primär-Skills stärker gewichten (2× Multiplikator) — `scoring.py`
+- [x] Cookie-Extraktion im Container (JSON-Datei unter `data/cookies/`) — `cookie_manager.py`
+- [x] Web-UI für Ergebnisanzeige (FastAPI + Jinja2, Bootstrap 5) — `src/web.py`, `templates/`
+- [x] .dockerignore angelegt
 
 ---
 
 ## Offen
 
-### IMAP-Abruf
-- [ ] IMAP-Verbindung zu ionos.de testen/fixen (Verbindungsfehler)
-- [ ] E-Mails automatisch vom Postfach abrufen (nur neue/ungelesene)
-- [ ] Bereits verarbeitete E-Mails markieren (kein Doppelt-Import)
-- [ ] Aktuell nur mbox-Import — Live-IMAP-Abruf integrieren
-
-### Scoring-Tuning
-- [ ] Gewichtungen anpassen (aktuell: Skills 50%, Keywords 15%, Remote 15%, Ort 10%, Vertrag 10%)
-- [ ] Fuzzy-Matching-Schwellenwert optimieren (aktuell 80)
-- [ ] Primär-Skills stärker gewichten
-- [ ] Ergebnisse mit manuellem Feedback vergleichen
-
 ### Cookie-Management
-- [ ] Fallback: Login via Username/Passwort wenn Cookie abgelaufen
-- [ ] Cookie-Extraktion im Container (kein Host-Firefox verfügbar)
+
+- [ ] Abgelaufenes/ungültiges Cookie erkennen, Hinweis ausgeben und Lauf abbrechen (Cookie manuell erneuern via Browser-Login)
 
 ### Ergebnis-Export
-- [ ] Export als CSV/JSON/Markdown
-- [ ] Tägliche Zusammenfassung per E-Mail
+
+- [ ] ~~Export als CSV/JSON/Markdown~~ *(zurückgestellt — Terminal-Output reicht derzeit)*
 
 ### Automatisierung
-- [ ] Scheduler (cron/systemd-Timer) für regelmäßigen Pipeline-Lauf
+
 - [ ] Alembic-Migrationen einrichten
 - [ ] .dockerignore anlegen (venv, __pycache__, .git, data/projects)
 
 ### Später / Nice-to-have
-- [ ] Web-UI für Ergebnisanzeige
+
 - [ ] Historisierung (wann Projekt gesehen, Status-Änderungen)
 - [ ] Benachrichtigung bei neuen Top-Treffern
