@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 FREELANCERMAP_DOMAIN = "freelancermap.de"
 AUTH_CHECK_URL = "https://www.freelancermap.de/projektboerse.html"
-COOKIE_FILE = Path("data/cookies/freelancermap.json")
+COOKIE_FILE = Path(__file__).parent.parent / "data/cookies/freelancermap.json"
 
 
 def get_firefox_cookies(domain: str = FREELANCERMAP_DOMAIN) -> CookieJar:
@@ -74,8 +74,8 @@ def verify_session(cookies: httpx.Cookies | CookieJar | None = None) -> bool:
             logger.warning("Session ungültig — Redirect zu Login: %s", location)
             return False
 
-    logger.info("Session-Check: Status %d", resp.status_code)
-    return resp.status_code == 200
+    logger.warning("Session-Check: unerwarteter Status %d", resp.status_code)
+    return False
 
 
 def get_authenticated_cookies() -> httpx.Cookies:

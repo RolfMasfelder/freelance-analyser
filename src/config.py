@@ -10,19 +10,14 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # PostgreSQL
-    postgres_user: str = "freelance"
-    postgres_password: str = "changeme"
-    postgres_db: str = "freelance_analyser"
-    database_url: str = (
-        "postgresql+psycopg://freelance:changeme@db:5432/freelance_analyser"
-    )
+    # PostgreSQL — Pflichtfeld, muss in .env gesetzt sein
+    database_url: str
 
-    # IMAP
-    imap_host: str = "imap.example.com"
+    # IMAP — Pflichtfelder für Live-Abruf; bei --no-imap nicht benötigt
+    imap_host: str
+    imap_user: str
+    imap_password: str
     imap_port: int = 993
-    imap_user: str = ""
-    imap_password: str = ""
     imap_ssl: bool = True
 
     # Freelancermap

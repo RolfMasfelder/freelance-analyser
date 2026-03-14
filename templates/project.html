@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %} — {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="/" class="text-decoration-none">&larr; Zurück zum Ranking</a>
+</div>
+
+<div class="d-flex align-items-start gap-3 mb-4">
+  <h2 class="mb-0">{{ project.title }}</h2>
+  {% if match %}
+    {% if match.score >= 70 %}
+      <span class="badge bg-success fs-5 mt-1">{{ "%.1f"|format(match.score) }}</span>
+    {% elif match.score >= 40 %}
+      <span class="badge bg-warning text-dark fs-5 mt-1">{{ "%.1f"|format(match.score) }}</span>
+    {% else %}
+      <span class="badge bg-secondary fs-5 mt-1">{{ "%.1f"|format(match.score) }}</span>
+    {% endif %}
+  {% endif %}
+</div>
+
+<div class="row g-4">
+
+  <!-- Linke Spalte: Projektinfos -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Projektdetails</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          {% if project.company %}
+          <dt class="col-sm-4">Unternehmen</dt>
+          <dd class="col-sm-8">{{ project.company }}</dd>
+          {% endif %}
+          {% if project.location %}
+          <dt class="col-sm-4">Standort</dt>
+          <dd class="col-sm-8">{{ project.location }}{% if project.country and project.country != project.location %} ({{ project.country }}){% endif %}</dd>
+          {% endif %}
+          {% if project.remote %}
+          <dt class="col-sm-4">Remote</dt>
+          <dd class="col-sm-8">{{ project.remote }}</dd>
+          {% endif %}
+          {% if project.contract_type %}
+          <dt class="col-sm-4">Vertragsart</dt>
+          <dd class="col-sm-8">{{ project.contract_type }}</dd>
+          {% endif %}
+          {% if project.start %}
+          <dt class="col-sm-4">Start</dt>
+          <dd class="col-sm-8">{{ project.start }}</dd>
+          {% endif %}
+          {% if project.duration %}
+          <dt class="col-sm-4">Laufzeit</dt>
+          <dd class="col-sm-8">{{ project.duration }}</dd>
+          {% endif %}
+          {% if project.utilization %}
+          <dt class="col-sm-4">Auslastung</dt>
+          <dd class="col-sm-8">{{ project.utilization }}</dd>
+          {% endif %}
+          {% if project.industry %}
+          <dt class="col-sm-4">Branche</dt>
+          <dd class="col-sm-8">{{ project.industry }}</dd>
+          {% endif %}
+          {% if project.url %}
+          <dt class="col-sm-4">URL</dt>
+          <dd class="col-sm-8"><a href="{{ project.url }}" target="_blank" rel="noopener noreferrer">Projekt öffnen ↗</a></dd>
+          {% endif %}
+          <dt class="col-sm-4">Zuerst gesehen</dt>
+          <dd class="col-sm-8">{{ project.first_seen.strftime("%d.%m.%Y %H:%M") if project.first_seen else "–" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    {% if project.skills %}
+    <div class="card shadow-sm mt-3">
+      <div class="card-header fw-semibold">Geforderte Skills</div>
+      <div class="card-body">
+        {% for skill in project.skills %}
+          <span class="badge bg-light text-dark border me-1 mb-1">{{ skill }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if project.description %}
+    <div class="card shadow-sm mt-3">
+      <div class="card-header fw-semibold">Beschreibung</div>
+      <div class="card-body">
+        <p class="mb-0" style="white-space: pre-wrap;">{{ project.description }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Rechte Spalte: Match-Ergebnis -->
+  <div class="col-lg-5">
+    {% if match %}
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">CV-Match</div>
+      <div class="card-body">
+        {% if match.matched_skills %}
+        <h6 class="text-success">Vorhandene Skills</h6>
+        <div class="mb-3">
+          {% for skill in match.matched_skills %}
+            <span class="badge bg-success me-1 mb-1">{{ skill }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if match.missing_skills %}
+        <h6 class="text-danger">Fehlende Skills</h6>
+        <div class="mb-3">
+          {% for skill in match.missing_skills %}
+            <span class="badge bg-danger me-1 mb-1">{{ skill }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if match.notes %}
+        <h6 class="text-muted">Hinweis</h6>
+        <p class="text-muted small mb-0">{{ match.notes }}</p>
+        {% endif %}
+
+        <hr>
+        <small class="text-muted">Berechnet: {{ match.created_at.strftime("%d.%m.%Y %H:%M") if match.created_at else "–" }}</small>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+      Kein Match-Ergebnis vorhanden. Pipeline erneut ausführen.
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

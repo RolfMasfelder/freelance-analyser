@@ -84,26 +84,36 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
     engine = get_engine(db_url)
     create_tables(engine)
     session_factory = get_session_factory(engine)
-
     cv = load_cv(cv_path)
     logger.info("CV geladen: %s (%d Skills)", cv.name, len(cv.all_skills))
 
-    # --- Phase 1: E-Mails parsen ---
-    projects_from_email = []
+    projects_from_email = _phase_fetch_emails(imap, mbox_path, settings, logger)
+    scraped_details = _phase_scrape(scrape, projects_from_email, logger)
+    new_project_ids = _phase_save_to_db(
+        session_factory, projects_from_email, scraped_details, logger
+    )
+    _phase_match_and_score(session_factory, cv, top, new_project_ids, logger)
+
+
+def _phase_fetch_emails(imap: bool, mbox_path, settings, logger) -> list:
+    """Phase 1: E-Mails via IMAP oder mbox einlesen."""
+    projects = []
     if imap:
         logger.info("Hole neue E-Mails via IMAP...")
         raw_emails = fetch_emails(settings=settings, mark_seen=True)
         logger.info("%d E-Mails abgerufen", len(raw_emails))
         for raw in raw_emails:
-            entries = parse_email_body(raw.body)
-            projects_from_email.extend(entries)
-        logger.info("%d Projekte aus IMAP-Mails extrahiert", len(projects_from_email))
+            projects.extend(parse_email_body(raw.body))
+        logger.info("%d Projekte aus IMAP-Mails extrahiert", len(projects))
     elif mbox_path:
         logger.info("Lese mbox: %s", mbox_path)
-        projects_from_email = parse_mbox_file(mbox_path)
-        logger.info("%d Projekte aus E-Mails extrahiert", len(projects_from_email))
+        projects = parse_mbox_file(mbox_path)
+        logger.info("%d Projekte aus E-Mails extrahiert", len(projects))
+    return projects
 
-    # --- Phase 2: Scrapen (optional) ---
+
+def _phase_scrape(scrape: bool, projects_from_email: list, logger) -> list:
+    """Phase 2: Projektseiten scrapen oder gecachte HTML-Dateien laden."""
     scraped_details = []
     if scrape and projects_from_email:
         from src.cookie_manager import get_authenticated_cookies
@@ -114,12 +124,9 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
         cookies = get_authenticated_cookies()
         html_map = scrape_project_pages(urls, cookies)
         logger.info("%d Projektseiten gescraped", len(html_map))
-
         for url, html in html_map.items():
-            detail = parse_project_html(html, url=url)
-            scraped_details.append(detail)
+            scraped_details.append(parse_project_html(html, url=url))
     elif not scrape and projects_from_email:
-        # Gecachte HTML-Dateien aus data/projects/ laden
         cache_dir = Path("data/projects")
         if cache_dir.exists():
             for entry in projects_from_email:
@@ -128,16 +135,19 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
                     html_file = cache_dir / f"{entry.project_id}.html"
                 if html_file.exists():
                     html = html_file.read_text(encoding="utf-8")
-                    detail = parse_project_html(html, url=entry.url)
-                    scraped_details.append(detail)
+                    scraped_details.append(parse_project_html(html, url=entry.url))
+    return scraped_details
 
-    # --- Phase 3: DB speichern ---
+
+def _phase_save_to_db(
+    session_factory, projects_from_email: list, scraped_details: list, logger
+) -> set[int]:
+    """Phase 3: Projekte in DB speichern. Gibt IDs neuer Projekte zurück."""
     session = session_factory()
+    new_project_ids: set[int] = set()
     new_count = 0
     updated_count = 0
-    new_project_ids: set[int] = set()
     try:
-        # 3a: E-Mail-Projekte sicherstellen (neu anlegen oder last_seen updaten)
         for entry in projects_from_email:
             email_data = {
                 "project_id": entry.project_id,
@@ -155,12 +165,8 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
                 new_project_ids.add(entry.project_id)
             else:
                 updated_count += 1
-
-        # 3b: Gescrapte Details updaten (überschreibt mit vollständigen Daten)
         for detail in scraped_details:
-            data = asdict(detail)
-            upsert_project(session, data)
-
+            upsert_project(session, asdict(detail))
         session.commit()
         logger.info(
             "%d neue Projekte in DB, %d aktualisiert, %d mit Details",
@@ -174,13 +180,17 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
         raise
     finally:
         session.close()
+    return new_project_ids
 
-    # --- Phase 4: Matching & Scoring ---
+
+def _phase_match_and_score(
+    session_factory, cv, top: int, new_project_ids: set[int], logger
+):
+    """Phase 4+5: Matching, Scoring und Ranking ausgeben."""
     session = session_factory()
     try:
         all_projects = get_all_projects(session)
         logger.info("%d Projekte in DB für Matching", len(all_projects))
-
         scored_list = []
         for proj in all_projects:
             match = match_project(
@@ -198,8 +208,6 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
                 project_contract=proj.contract_type,
             )
             scored_list.append(scored)
-
-            # Match in DB speichern
             save_match_result(
                 session,
                 project_id=proj.project_id,
@@ -208,13 +216,9 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
                 missing_skills=scored.missing_skills,
                 notes=scored.exclude_reason if scored.excluded else "",
             )
-
         session.commit()
-
-        # --- Phase 5: Ranking ausgeben ---
         ranked = rank_projects(scored_list)
         _print_ranking(ranked[:top], all_projects, new_project_ids=new_project_ids)
-
     except Exception:
         session.rollback()
         logger.exception("Fehler beim Matching")
@@ -272,6 +276,9 @@ def rank(cv_path, db_url, top, log_level):
 
         ranked = rank_projects(scored_list)
         _print_ranking(ranked[:top], all_projects)
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()
 
