@@ -4,7 +4,7 @@ Automatisierte Pipeline zur Überwachung von Freelance-Projekten auf freelancerm
 
 ## Pipeline
 
-```
+```txt
 E-Mail abholen → Parsen → Links extrahieren → Scrapen → DB speichern → CV-Matching → Rangliste
 ```
 
@@ -63,6 +63,24 @@ docker compose exec freelance-analyser python scripts/run_pipeline.py rank --top
 ```bash
 docker compose exec freelance-analyser python -m pytest tests/ -v
 ```
+
+## Web-UI
+
+Das Frontend zeigt die Rangliste und Projektdetails im Browser.
+
+```bash
+# Web-Container starten (nur einmalig nötig, läuft dann dauerhaft)
+docker compose up -d web
+
+# → http://localhost:8080
+```
+
+| Route | Beschreibung |
+|---|---|
+| `/` | Rangliste (Top 50, konfigurierbar via `?top=N`, max. 500) |
+| `/project/<id>` | Projektdetail: Infos, geforderte Skills, CV-Match |
+
+Die Anzeige basiert auf den in der DB gespeicherten Match-Ergebnissen — zuerst die Pipeline ausführen (`run_pipeline.py run`), dann das Frontend öffnen.
 
 ## Projektstruktur
 
