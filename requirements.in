@@ -30,6 +30,9 @@ scikit-learn
 # LLM
 openai
 
+# ODT-Parsing
+odfpy
+
 # Web-UI
 fastapi
 uvicorn[standard]

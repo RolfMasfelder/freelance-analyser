@@ -105,8 +105,8 @@ async def generate_project_letter(
     letter_result = None
 
     try:
-        cv = load_cv()
         settings = Settings()
+        cv = load_cv(settings.cv_path)
         letter_result = generate_letter(project, cv, matched_skills, settings)
     except Exception as exc:
         log.exception("Fehler bei Antwortschreiben-Generierung")
