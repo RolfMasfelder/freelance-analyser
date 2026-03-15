@@ -1,6 +1,7 @@
 """Tests für src/web.py — FastAPI Web-UI."""
 
 from datetime import UTC, datetime
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -9,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.database import MatchResult, Project, create_tables
+from src.letter_generator import LetterResult
 from src.web import app, get_db
 
 SAMPLE_PROJECT = {
@@ -144,3 +146,47 @@ class TestProjectDetailPage:
         response = client.get("/project/1001")
         assert response.status_code == 200
         assert "Kein Match-Ergebnis" in response.text
+
+    def test_generate_letter_button_shown(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/project/1001")
+        assert "Antwortschreiben generieren" in response.text
+
+
+class TestLetterGeneration:
+    @patch("src.web.generate_letter")
+    @patch("src.web.load_cv")
+    def test_post_letter_returns_200(self, mock_cv, mock_gen, client, db_session):
+        _add_project_with_match(db_session)
+        mock_cv.return_value = MagicMock()
+        mock_gen.return_value = LetterResult(
+            letter="Sehr geehrte Damen und Herren...",
+            model="llama3.1:8b",
+        )
+        response = client.post("/project/1001/letter")
+        assert response.status_code == 200
+        assert "Sehr geehrte Damen und Herren" in response.text
+
+    @patch("src.web.generate_letter")
+    @patch("src.web.load_cv")
+    def test_post_letter_shows_model(self, mock_cv, mock_gen, client, db_session):
+        _add_project_with_match(db_session)
+        mock_cv.return_value = MagicMock()
+        mock_gen.return_value = LetterResult(letter="Text", model="test-model")
+        response = client.post("/project/1001/letter")
+        assert "test-model" in response.text
+
+    @patch(
+        "src.web.generate_letter", side_effect=ConnectionError("LLM nicht erreichbar")
+    )
+    @patch("src.web.load_cv")
+    def test_post_letter_error_shown(self, mock_cv, mock_gen, client, db_session):
+        _add_project_with_match(db_session)
+        mock_cv.return_value = MagicMock()
+        response = client.post("/project/1001/letter")
+        assert response.status_code == 200
+        assert "LLM nicht erreichbar" in response.text
+
+    def test_post_letter_nonexistent_project(self, client):
+        response = client.post("/project/9999/letter")
+        assert response.status_code == 404

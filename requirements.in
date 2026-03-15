@@ -27,6 +27,9 @@ pyyaml
 rapidfuzz
 scikit-learn
 
+# LLM
+openai
+
 # Web-UI
 fastapi
 uvicorn[standard]

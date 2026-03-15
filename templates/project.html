@@ -128,6 +128,48 @@
       Kein Match-Ergebnis vorhanden. Pipeline erneut ausführen.
     </div>
     {% endif %}
+
+    <!-- Antwortschreiben -->
+    <div class="card shadow-sm mt-3">
+      <div class="card-header fw-semibold">Antwortschreiben</div>
+      <div class="card-body">
+        {% if letter_error is defined and letter_error %}
+          <div class="alert alert-danger mb-3">
+            <strong>Fehler:</strong> {{ letter_error }}
+          </div>
+        {% endif %}
+
+        {% if letter is defined and letter %}
+          <div class="mb-2">
+            <small class="text-muted">Modell: {{ letter_model }}</small>
+          </div>
+          <div class="border rounded p-3 bg-light" style="white-space: pre-wrap;">{{ letter }}</div>
+          <div class="mt-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('letter-text').innerText)">
+              Kopieren
+            </button>
+          </div>
+          <div id="letter-text" class="d-none">{{ letter }}</div>
+        {% else %}
+          <p class="text-muted small mb-3">
+            Generiert ein Antwortschreiben auf Basis deines CVs und der Projektanforderungen per LLM.
+          </p>
+          <form method="post" action="/project/{{ project.project_id }}/letter">
+            <button type="submit" class="btn btn-primary" id="btn-generate">
+              <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></span>
+              Antwortschreiben generieren
+            </button>
+          </form>
+          <script>
+            document.getElementById('btn-generate').addEventListener('click', function() {
+              this.disabled = true;
+              document.getElementById('spinner').classList.remove('d-none');
+              this.closest('form').submit();
+            });
+          </script>
+        {% endif %}
+      </div>
+    </div>
   </div>
 
 </div>
