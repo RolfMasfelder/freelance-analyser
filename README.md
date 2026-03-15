@@ -84,7 +84,7 @@ Die Anzeige basiert auf den in der DB gespeicherten Match-Ergebnissen — zuerst
 
 ## Projektstruktur
 
-```
+```txt
 src/
 ├── email_fetcher.py    — IMAP-Abruf
 ├── email_parser.py     — E-Mail parsen, Links extrahieren

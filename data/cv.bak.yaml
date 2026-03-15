@@ -1,37 +1,32 @@
 name: "Rolf Masfelder"
 title: "Diplom-Informatiker (FH) — Geschäftsführer Nector IT GmbH"
-phone: "+49 160 8064181"
-email: "rolf.masfelder@nector-it-gmbh.de"
-experience_years: 39
+experience_years: 37
 
 # Primäre Skills (hohe Gewichtung) — aus aktuellem Schwerpunkt & jüngsten Projekten
 skills:
   - Python
-  - Java
   - PostgreSQL
-  - Oracle
   - SQL
   - PL/SQL
   - PL/pgSQL
   - Docker
-  - Kubernetes
+  - Linux
   - Django
   - Git
   - CI/CD
-  - Jenkins
-  - Maven
   - REST
+  - Oracle
+  - Java
   - Agile
   - Scrum
-  - Vue.js
-  - React
-  - REST API Design
-  - Linux
-  - arc42
-  - req42
 
 # Sekundäre Skills (niedrigere Gewichtung)
 skills_secondary:
+  - Kubernetes
+  - Vue
+  - React
+  - Jenkins
+  - Maven
   - gRPC
   - protobuf
   - OpenAPI
@@ -44,16 +39,23 @@ skills_secondary:
   - XML
   - XSLT
   - SQLite
+  - Spring
+  - Spring Boot
+  - Spring Integration
+  - Hibernate
+  - Tomcat
+  - TomEE
   - JavaScript
   - Jira
   - Confluence
   - Monitoring
   - Performance Tuning
   - Datenbankadministration
-  - Datenbankoptimierung
   - Shell Scripting
   - SSH
   - Raspberry Pi
+  - arc42
+  - req42
 
 # Präferenzen
 preferred_locations:

@@ -52,6 +52,8 @@ Erstelle ein Antwortschreiben für folgendes Freelance-Projekt.
 ## FREELANCER
 - Name: {cv.name}
 - Titel: {cv.title}
+- Phone: {cv.phone or "nicht angegeben"}
+- Email: {cv.email or "nicht angegeben"}
 - Erfahrung: {cv.experience_years} Jahre
 - Primäre Skills: {skills_text}
 - Sekundäre Skills: {secondary_text}
@@ -109,7 +111,7 @@ def generate_letter(
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0.7,
+        temperature=0.3,
         max_tokens=10000,
     )
 

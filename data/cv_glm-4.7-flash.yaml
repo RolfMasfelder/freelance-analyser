@@ -1,0 +1,72 @@
+name: "Rolf Masfelder"
+title: "Geschäftsführender Gesellschafter"
+experience_years: 39
+
+skills:
+  - Python
+  - PostgreSQL
+  - Django
+  - Docker
+  - Kubernetes
+  - Vue.js
+  - Javascript
+  - REST API / OpenAPI / Swagger
+  - gRPC / Protobuf
+  - CI/CD (Jenkins, Maven)
+  - SQL / PL/SQL
+  - AI / Machine Learning (LLMs)
+
+skills_secondary:
+  - Oracle (12c, 10c, 8i)
+  - Java (Spring, Spring Integration, Hibernate, JPA)
+  - PL/SQL
+  - T-SQL
+  - MQTT
+  - IBM Websphere MQ
+  - SVN
+  - Maven
+  - Nexus
+  - TOMEE, Tomcat
+  - Linux (sh, ksh, ssh, OpenSSH, scp, sFTP)
+  - Batch-Dateien / Shell-Scripting
+  - Raspberry Pi (Hardware)
+  - AWS (S3 buckets)
+  - TensorFlow / Keras
+  - Visual Studio Code
+  - Anthropic Claude / OpenAI
+  - LLMs (local)
+  - XSLT
+  - XML
+  - Axis2
+
+preferred_locations:
+  - Andernach
+
+preferred_remote: "100%"
+
+preferred_contract_types:
+  - Selbstständig
+
+min_duration_months: 3
+
+exclude_skills:
+  - SAP
+  - ABAP
+  - Cobol
+  - Mainframe
+  - .NET
+
+exclude_industries: []
+
+keywords:
+  - agile
+  - devops
+  - backend
+  - frontend
+  - database
+  - oracle
+  - postgresql
+  - python
+  - java
+  - cloud
+  - kubernetes

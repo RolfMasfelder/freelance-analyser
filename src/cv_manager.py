@@ -15,6 +15,8 @@ class CVProfile:
 
     name: str = ""
     title: str = ""
+    phone: str | None = None
+    email: str | None = None
     skills: list[str] = field(default_factory=list)
     skills_secondary: list[str] = field(default_factory=list)
     experience_years: int = 0

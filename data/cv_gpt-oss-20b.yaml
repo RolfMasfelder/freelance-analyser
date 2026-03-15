@@ -1,0 +1,69 @@
+name: "Rolf Masfelder"
+title: "Freelance IT Consultant & Geschäftsführer"
+experience_years: 39
+
+skills:
+  - Python
+  - Java
+  - SQL
+  - PL/SQL
+  - PostgreSQL
+  - Oracle
+  - Docker
+  - Kubernetes
+  - Git
+  - Jenkins
+  - Maven
+  - CI/CD
+  - Vue.js
+  - React
+  - REST API Design
+
+skills_secondary:
+  - MQTT
+  - IBM Websphere MQ
+  - SVN
+  - Github Actions (GitHub)
+  - Nexus Repository Manager
+  - TomEE
+  - Tomcat
+  - gRPC
+  - Protocol Buffers (protobuf)
+  - OpenAPI/Swagger
+  - Linux Shell Scripting (sh, ksh, ssh, scp, sftp)
+  - TensorFlow/Keras
+  - Playwright
+  - Django
+  - SQL Developer
+  - PL/pgSQL
+  - T-SQL
+
+preferred_locations:
+  - Andernach
+  - Remote
+preferred_remote: "100%"
+preferred_contract_types:
+  - Freiberuflich
+  - Contracting
+min_duration_months: 3
+
+exclude_skills:
+  - SAP
+  - ABAP
+  - Cobol
+  - Mainframe
+  - .NET
+exclude_industries: []
+
+keywords:
+  - cloud
+  - devops
+  - backend
+  - api
+  - database administration
+  - performance tuning
+  - automation
+  - agile scrum kanban
+  - python development
+  - java development
+  - oracle db design
