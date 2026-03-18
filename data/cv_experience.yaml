@@ -69,8 +69,6 @@ experience:
       - Docker
       - Kubernetes
       - CI/CD
-      - Prometheus & Grafana
-      - Playwright
 
   - role: "Entwickler"
     project: "Bitcoin-Blockchain Auslese & Analyse"

@@ -72,6 +72,41 @@
       "type": "array",
       "description": "Bonus-Keywords für Scoring (kleingeschrieben).",
       "items": { "type": "string" }
+    },
+    "experience": {
+      "type": "array",
+      "description": "Projekthistorie / Berufserfahrung mit Kontext (Rolle, Beschreibung, Skills).",
+      "items": {
+        "type": "object",
+        "required": ["role", "project", "description"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Tatsächliche Rolle im Projekt (z.B. 'Entwickler', 'Berater')."
+          },
+          "project": {
+            "type": "string",
+            "description": "Projektname oder -beschreibung."
+          },
+          "description": {
+            "type": "string",
+            "description": "Konkrete Tätigkeiten und Aufgaben im Projekt."
+          },
+          "skills": {
+            "type": "array",
+            "description": "Im Projekt eingesetzte Skills.",
+            "items": { "type": "string" }
+          },
+          "company": {
+            "type": "string",
+            "description": "Unternehmen / Kunde (optional)."
+          },
+          "period": {
+            "type": "string",
+            "description": "Zeitraum (z.B. '2020–2022')."
+          }
+        }
+      }
     }
   },
   "additionalProperties": false

@@ -36,6 +36,16 @@ skills_secondary:
   - Skill1
   - Skill2
 
+experience:
+  - role: "Tatsächliche Rolle im Projekt"
+    project: "Projektname oder -beschreibung"
+    company: "Unternehmen / Kunde"
+    period: "JJJJ–JJJJ"
+    description: "Konkrete Tätigkeiten und Aufgaben im Projekt."
+    skills:
+      - Skill1
+      - Skill2
+
 preferred_locations:
   - Ort1
   - Remote
@@ -62,6 +72,13 @@ Regeln:
 (max. 15-20). Das sind die Skills mit denen der Freelancer aktiv arbeitet.
 - "skills_secondary" = alle weiteren genannten Skills, Technologien, Tools.
 - "experience_years" = berechne aus dem frühesten genannten Berufsjahr bis heute (2026).
+- "experience" = Projekthistorie / Berufserfahrung. WICHTIG:
+  - "role" muss die TATSÄCHLICHE Rolle im Projekt sein \
+(z.B. "Entwickler", "Berater", "Tester"), NICHT die gewünschte oder vermutete.
+  - Wenn im CV nur "Mitarbeit" oder ähnlich steht, NICHT "Projektleiter" daraus machen.
+  - "description" = die konkreten Tätigkeiten, die im CV für dieses Projekt genannt werden.
+  - "skills" = die im Projekt eingesetzten Technologien/Skills.
+  - Extrahiere die letzten 5–10 relevantesten Projekte.
 - "keywords" = Themengebiete und Buzzwords die der Freelancer abdeckt \
 (cloud, devops, backend, api, etc.) — kleingeschrieben.
 - "preferred_locations" = wenn Wohnort oder Remote-Präferenz erkennbar.
@@ -179,11 +196,13 @@ def main(odt_path: Path, output: Path, dry_run: bool):
 
     data = validate_cv_yaml(yaml_text)
     skill_count = len(data.get("skills", [])) + len(data.get("skills_secondary", []))
+    exp_count = len(data.get("experience", []))
     log.info(
-        "Erkannte Skills: %d (primär: %d, sekundär: %d)",
+        "Erkannte Skills: %d (primär: %d, sekundär: %d), Projekterfahrungen: %d",
         skill_count,
         len(data.get("skills", [])),
         len(data.get("skills_secondary", [])),
+        exp_count,
     )
 
     if dry_run:

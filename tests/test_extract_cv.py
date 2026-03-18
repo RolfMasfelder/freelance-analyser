@@ -29,6 +29,16 @@ skills:
 skills_secondary:
   - React
 
+experience:
+  - role: "Backend-Entwickler"
+    project: "REST-API-Plattform"
+    company: "Test GmbH"
+    period: "2021–2023"
+    description: "Entwicklung von REST-APIs mit Python."
+    skills:
+      - Python
+      - Docker
+
 preferred_locations:
   - Remote
 preferred_remote: "100%"
@@ -102,6 +112,15 @@ class TestValidateCvYaml:
         assert data["experience_years"] == 15
         assert "React" in data["skills_secondary"]
         assert "backend" in data["keywords"]
+
+    def test_experience_extracted(self):
+        data = validate_cv_yaml(SAMPLE_YAML)
+        assert "experience" in data
+        assert len(data["experience"]) == 1
+        entry = data["experience"][0]
+        assert entry["role"] == "Backend-Entwickler"
+        assert entry["project"] == "REST-API-Plattform"
+        assert "Python" in entry["skills"]
 
 
 class TestExtractTextFromOdt:
