@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from openai import OpenAI
 
 from src.config import Settings
-from src.cv_manager import CVProfile
+from src.cv_manager import CVProfile, ExperienceEntry
 from src.database import Project
 
 log = logging.getLogger(__name__)
@@ -21,9 +21,50 @@ die zum Projekt passen
 - Konkret auf die Projektanforderungen eingehen
 - Kurz und prägnant sein (max. 300 Wörter)
 - Professionell aber nicht übertrieben förmlich klingen
-- Keine erfundenen Qualifikationen oder Erfahrungen enthalten
-- Nur Skills erwähnen, die der Freelancer tatsächlich hat
+
+WICHTIG — Strenge Regeln für Erfahrungsangaben:
+- Verwende AUSSCHLIESSLICH die unter "RELEVANTE PROJEKTERFAHRUNG" \
+aufgeführten Erfahrungen als Grundlage.
+- Erwähne NUR die dort genannte Rolle (z.B. "Entwickler", "Berater"). \
+Erfinde KEINE höherwertigen Rollen (z.B. "Projektleiter", "Architekt"), \
+wenn diese nicht explizit in den Erfahrungen stehen.
+- Übertreibe NICHT den Umfang oder die Komplexität der früheren Tätigkeiten.
+- Wenn keine passende Projekterfahrung vorhanden ist, erwähne nur \
+die vorhandenen Skills ohne konkreten Projektzusammenhang.
+- Erfinde KEINE Qualifikationen, Zertifikate oder Erfahrungen.
 """
+
+
+def _find_relevant_experience(
+    experience: list[ExperienceEntry], matched_skills: list[str] | None
+) -> list[ExperienceEntry]:
+    """Filtert Erfahrungseinträge, die zu den gematchten Skills passen."""
+    if not experience or not matched_skills:
+        return []
+    matched_lower = {s.lower() for s in matched_skills}
+    relevant = []
+    for entry in experience:
+        entry_skills = {s.lower() for s in entry.skills}
+        if entry_skills & matched_lower:
+            relevant.append(entry)
+    return relevant
+
+
+def _format_experience(entries: list[ExperienceEntry]) -> str:
+    """Formatiert Erfahrungseinträge als Text für den Prompt."""
+    if not entries:
+        return "Keine passende Projekterfahrung vorhanden."
+    parts = []
+    for entry in entries:
+        skills_text = ", ".join(entry.skills) if entry.skills else "–"
+        parts.append(
+            f"- Projekt: {entry.project}\n"
+            f"  Rolle: {entry.role}\n"
+            f"  Zeitraum: {entry.period or 'k.A.'}\n"
+            f"  Beschreibung: {entry.description}\n"
+            f"  Skills: {skills_text}"
+        )
+    return "\n".join(parts)
 
 
 def _build_user_prompt(
@@ -34,6 +75,9 @@ def _build_user_prompt(
     secondary_text = ", ".join(cv.skills_secondary) if cv.skills_secondary else "–"
     matched_text = ", ".join(matched_skills) if matched_skills else "–"
     project_skills_text = ", ".join(project.skills) if project.skills else "–"
+
+    relevant_exp = _find_relevant_experience(cv.experience, matched_skills)
+    experience_text = _format_experience(relevant_exp)
 
     return f"""\
 Erstelle ein Antwortschreiben für folgendes Freelance-Projekt.
@@ -59,8 +103,12 @@ Erstelle ein Antwortschreiben für folgendes Freelance-Projekt.
 - Sekundäre Skills: {secondary_text}
 - Passende Skills (CV ∩ Projekt): {matched_text}
 
-Schreibe ein professionelles Antwortschreiben, das die passenden Skills \
-hervorhebt und konkret auf die Projektanforderungen eingeht.\
+## RELEVANTE PROJEKTERFAHRUNG
+{experience_text}
+
+Schreibe ein professionelles Antwortschreiben basierend auf den oben \
+aufgeführten tatsächlichen Erfahrungen. Verwende NUR Rollen und Tätigkeiten, \
+die in der Projekterfahrung explizit genannt werden. Erfinde KEINE Erfahrungen.\
 """
 
 

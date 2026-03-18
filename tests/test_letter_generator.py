@@ -5,11 +5,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.cv_manager import CVProfile
+from src.cv_manager import CVProfile, ExperienceEntry
 from src.database import Project
 from src.letter_generator import (
     LetterResult,
     _build_user_prompt,
+    _find_relevant_experience,
+    _format_experience,
     _strip_thinking,
     generate_letter,
 )
@@ -28,6 +30,24 @@ def cv():
         preferred_locations=["München"],
         preferred_remote="100%",
         preferred_contract_types=["Freiberuflich"],
+        experience=[
+            ExperienceEntry(
+                role="Backend-Entwickler",
+                project="REST-API-Plattform",
+                company="Test GmbH",
+                period="2021–2023",
+                description="Entwicklung von REST-APIs mit Python/Django. Docker-Deployment.",
+                skills=["python", "docker", "rest"],
+            ),
+            ExperienceEntry(
+                role="Datenbankentwickler",
+                project="PostgreSQL-Migration",
+                company="DB Corp",
+                period="2019–2021",
+                description="Mitarbeit bei der Migration von MySQL auf PostgreSQL.",
+                skills=["postgresql", "sql", "migration"],
+            ),
+        ],
     )
 
 
@@ -221,3 +241,58 @@ class TestGenerateLetter:
 
         result = generate_letter(project, cv, settings=settings)
         assert result.letter == ""
+
+
+class TestFindRelevantExperience:
+    def test_finds_matching_entries(self, cv):
+        result = _find_relevant_experience(cv.experience, ["python", "docker"])
+        assert len(result) == 1
+        assert result[0].project == "REST-API-Plattform"
+
+    def test_finds_multiple_entries(self, cv):
+        result = _find_relevant_experience(cv.experience, ["python", "postgresql"])
+        assert len(result) == 2
+
+    def test_no_match_returns_empty(self, cv):
+        result = _find_relevant_experience(cv.experience, ["java"])
+        assert result == []
+
+    def test_none_skills_returns_empty(self, cv):
+        result = _find_relevant_experience(cv.experience, None)
+        assert result == []
+
+    def test_empty_experience_returns_empty(self):
+        result = _find_relevant_experience([], ["python"])
+        assert result == []
+
+    def test_case_insensitive_matching(self, cv):
+        result = _find_relevant_experience(cv.experience, ["Python", "Docker"])
+        assert len(result) == 1
+
+
+class TestFormatExperience:
+    def test_formats_entries(self, cv):
+        text = _format_experience(cv.experience[:1])
+        assert "REST-API-Plattform" in text
+        assert "Backend-Entwickler" in text
+        assert "2021–2023" in text
+
+    def test_empty_returns_no_experience_text(self):
+        text = _format_experience([])
+        assert "Keine passende Projekterfahrung" in text
+
+
+class TestBuildUserPromptWithExperience:
+    def test_contains_experience_section(self, project, cv):
+        prompt = _build_user_prompt(project, cv, matched_skills=["python", "docker"])
+        assert "RELEVANTE PROJEKTERFAHRUNG" in prompt
+        assert "REST-API-Plattform" in prompt
+        assert "Backend-Entwickler" in prompt
+
+    def test_no_match_shows_no_experience(self, project, cv):
+        prompt = _build_user_prompt(project, cv, matched_skills=["java"])
+        assert "Keine passende Projekterfahrung" in prompt
+
+    def test_contains_no_invention_instruction(self, project, cv):
+        prompt = _build_user_prompt(project, cv, matched_skills=["python"])
+        assert "Erfinde KEINE Erfahrungen" in prompt
