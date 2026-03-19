@@ -42,6 +42,7 @@ class Project(Base):
     duration = Column(String(100), nullable=False, default="")
     utilization = Column(String(100), nullable=False, default="")
     skills = Column(JSON, nullable=False, default=list)
+    language = Column(String(10), nullable=False, default="de")
     url = Column(String(500), nullable=False, default="")
     first_seen = Column(
         DateTime(timezone=True),
