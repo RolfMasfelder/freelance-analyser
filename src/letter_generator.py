@@ -12,9 +12,17 @@ from src.database import Project
 
 log = logging.getLogger(__name__)
 
+_LANGUAGE_LABELS = {"de": "Deutsch", "en": "Englisch"}
+
+
+def _language_label(code: str) -> str:
+    """Wandelt ISO-639-1 Sprachcode in lesbaren Namen."""
+    return _LANGUAGE_LABELS.get(code, "Deutsch")
+
+
 SYSTEM_PROMPT = """\
 Du bist ein erfahrener Freelance-Berater, der professionelle Antwortschreiben \
-auf Projektausschreibungen verfasst. Du schreibst auf Deutsch, sachlich und \
+auf Projektausschreibungen verfasst. Du schreibst sachlich und \
 überzeugend. Das Schreiben soll:
 - Die relevanten Skills und Erfahrungen des Freelancers hervorheben, \
 die zum Projekt passen
@@ -32,6 +40,9 @@ wenn diese nicht explizit in den Erfahrungen stehen.
 - Wenn keine passende Projekterfahrung vorhanden ist, erwähne nur \
 die vorhandenen Skills ohne konkreten Projektzusammenhang.
 - Erfinde KEINE Qualifikationen, Zertifikate oder Erfahrungen.
+
+WICHTIG — Sprache:
+- Schreibe das Antwortschreiben in {language}.
 """
 
 
@@ -156,7 +167,12 @@ def generate_letter(
     response = client.chat.completions.create(
         model=settings.llm_model,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT.format(
+                    language=_language_label(getattr(project, "language", "de")),
+                ),
+            },
             {"role": "user", "content": user_prompt},
         ],
         temperature=0.3,

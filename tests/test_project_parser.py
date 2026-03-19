@@ -6,6 +6,7 @@ import pytest
 
 from src.project_parser import (
     parse_project_html,
+    _detect_language,
 )
 
 SAMPLE_HTML = Path("data/projects/sample_2977008.html")
@@ -100,6 +101,54 @@ class TestParseProjectHtmlUnit:
         assert result.title == ""
         assert result.skills == []
         assert result.project_id == 0
+
+    def test_language_german(self):
+        result = parse_project_html(self.MINIMAL_HTML)
+        assert result.language == "de"
+
+    def test_language_english(self):
+        html = self.MINIMAL_HTML.replace(
+            "Python Entwickler gesucht",
+            "Looking for a Python Developer",
+        ).replace(
+            "Wir suchen einen Python Entwickler für ein spannendes Projekt.",
+            "We are looking for an experienced Python developer with strong skills.",
+        )
+        result = parse_project_html(html)
+        assert result.language == "en"
+
+
+class TestDetectLanguage:
+    def test_german_text(self):
+        assert (
+            _detect_language("Wir suchen einen erfahrenen Entwickler für ein Projekt")
+            == "de"
+        )
+
+    def test_english_text(self):
+        assert (
+            _detect_language(
+                "We are looking for an experienced developer for this project"
+            )
+            == "en"
+        )
+
+    def test_empty_defaults_to_de(self):
+        assert _detect_language("") == "de"
+
+    def test_mixed_mostly_german(self):
+        assert (
+            _detect_language("Wir suchen einen Developer mit Experience und Kenntnisse")
+            == "de"
+        )
+
+    def test_mixed_mostly_english(self):
+        assert (
+            _detect_language(
+                "We are looking for a Berater with experience and strong skills"
+            )
+            == "en"
+        )
 
 
 @pytest.mark.skipif(not SAMPLE_HTML.exists(), reason="Sample HTML nicht vorhanden")

@@ -12,6 +12,7 @@ from src.letter_generator import (
     _build_user_prompt,
     _find_relevant_experience,
     _format_experience,
+    _language_label,
     _strip_thinking,
     generate_letter,
 )
@@ -296,3 +297,64 @@ class TestBuildUserPromptWithExperience:
     def test_contains_no_invention_instruction(self, project, cv):
         prompt = _build_user_prompt(project, cv, matched_skills=["python"])
         assert "Erfinde KEINE Erfahrungen" in prompt
+
+
+class TestLanguageLabel:
+    def test_german(self):
+        assert _language_label("de") == "Deutsch"
+
+    def test_english(self):
+        assert _language_label("en") == "Englisch"
+
+    def test_unknown_defaults_to_deutsch(self):
+        assert _language_label("fr") == "Deutsch"
+
+
+class TestGenerateLetterLanguage:
+    @patch("src.letter_generator.OpenAI")
+    def test_system_prompt_contains_language(self, mock_openai_cls, project, cv):
+        mock_client = MagicMock()
+        mock_openai_cls.return_value = mock_client
+
+        mock_choice = MagicMock()
+        mock_choice.message.content = "Text"
+        mock_response = MagicMock()
+        mock_response.choices = [mock_choice]
+        mock_response.model = "m"
+        mock_response.usage = None
+        mock_client.chat.completions.create.return_value = mock_response
+
+        settings = MagicMock()
+        settings.llm_base_url = "http://localhost:11434/v1"
+        settings.llm_api_key = "x"
+        settings.llm_model = "m"
+
+        project.language = "de"
+        generate_letter(project, cv, settings=settings)
+        call_kwargs = mock_client.chat.completions.create.call_args
+        system_msg = call_kwargs.kwargs["messages"][0]["content"]
+        assert "Deutsch" in system_msg
+
+    @patch("src.letter_generator.OpenAI")
+    def test_english_project_uses_english(self, mock_openai_cls, project, cv):
+        mock_client = MagicMock()
+        mock_openai_cls.return_value = mock_client
+
+        mock_choice = MagicMock()
+        mock_choice.message.content = "Text"
+        mock_response = MagicMock()
+        mock_response.choices = [mock_choice]
+        mock_response.model = "m"
+        mock_response.usage = None
+        mock_client.chat.completions.create.return_value = mock_response
+
+        settings = MagicMock()
+        settings.llm_base_url = "http://localhost:11434/v1"
+        settings.llm_api_key = "x"
+        settings.llm_model = "m"
+
+        project.language = "en"
+        generate_letter(project, cv, settings=settings)
+        call_kwargs = mock_client.chat.completions.create.call_args
+        system_msg = call_kwargs.kwargs["messages"][0]["content"]
+        assert "Englisch" in system_msg
