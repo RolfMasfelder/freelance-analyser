@@ -1,11 +1,13 @@
 """Datenbankzugriff — SQLAlchemy-Models und CRUD-Operationen."""
 
+import enum
 import logging
 from datetime import datetime, timezone
 
 from sqlalchemy import (
     Column,
     DateTime,
+    Enum,
     Float,
     Integer,
     JSON,
@@ -17,6 +19,15 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 logger = logging.getLogger(__name__)
+
+
+class ProjectStatus(enum.Enum):
+    """Status eines Projekts im Bearbeitungsprozess."""
+
+    neu = "neu"
+    gesehen = "gesehen"
+    beworben = "beworben"
+    abgelehnt = "abgelehnt"
 
 
 class Base(DeclarativeBase):
@@ -44,6 +55,7 @@ class Project(Base):
     skills = Column(JSON, nullable=False, default=list)
     language = Column(String(10), nullable=False, default="de")
     url = Column(String(500), nullable=False, default="")
+    status = Column(Enum(ProjectStatus), nullable=False, default=ProjectStatus.neu)
     first_seen = Column(
         DateTime(timezone=True),
         nullable=False,
@@ -194,6 +206,17 @@ def save_match_result(
 def get_project(session: Session, project_id: int) -> Project | None:
     """Holt ein Projekt anhand der ID."""
     return session.get(Project, project_id)
+
+
+def update_project_status(
+    session: Session, project_id: int, status: ProjectStatus
+) -> Project | None:
+    """Aktualisiert den Status eines Projekts."""
+    project = session.get(Project, project_id)
+    if project:
+        project.status = status
+        logger.debug("Projekt %d Status → %s", project_id, status.value)
+    return project
 
 
 def get_all_projects(session: Session) -> list[Project]:

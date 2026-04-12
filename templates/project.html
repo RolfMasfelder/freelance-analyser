@@ -65,6 +65,17 @@
           {% endif %}
           <dt class="col-sm-4">Zuerst gesehen</dt>
           <dd class="col-sm-8">{{ project.first_seen.strftime("%d.%m.%Y %H:%M") if project.first_seen else "–" }}</dd>
+          <dt class="col-sm-4">Status</dt>
+          <dd class="col-sm-8">
+            <form method="post" action="/project/{{ project.project_id }}/status" class="d-inline">
+              <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                <option value="neu" {% if project.status.value == 'neu' %}selected{% endif %}>neu</option>
+                <option value="gesehen" {% if project.status.value == 'gesehen' %}selected{% endif %}>gesehen</option>
+                <option value="beworben" {% if project.status.value == 'beworben' %}selected{% endif %}>beworben</option>
+                <option value="abgelehnt" {% if project.status.value == 'abgelehnt' %}selected{% endif %}>abgelehnt</option>
+              </select>
+            </form>
+          </dd>
         </dl>
       </div>
     </div>
