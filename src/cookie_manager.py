@@ -11,7 +11,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 FREELANCERMAP_DOMAIN = "freelancermap.de"
-AUTH_CHECK_URL = "https://www.freelancermap.de/projektboerse.html"
+AUTH_CHECK_URL = "https://www.freelancermap.de/projekte"
 COOKIE_FILE = Path(__file__).parent.parent / "data/cookies/freelancermap.json"
 
 
