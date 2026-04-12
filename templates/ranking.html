@@ -4,10 +4,15 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2 class="mb-0">Top-{{ top }} Projekte</h2>
-  <div class="d-flex gap-2">
-    <a href="/?top=20" class="btn btn-sm btn-outline-secondary">Top 20</a>
-    <a href="/?top=50" class="btn btn-sm btn-outline-secondary">Top 50</a>
-    <a href="/?top=100" class="btn btn-sm btn-outline-secondary">Top 100</a>
+  <div class="d-flex gap-2 align-items-center">
+    {% if include_old %}
+      <a href="/?top={{ top }}" class="btn btn-sm btn-outline-warning" title="Nur Projekte der letzten 30 Tage">Ältere ausblenden</a>
+    {% else %}
+      <a href="/?top={{ top }}&include_old=true" class="btn btn-sm btn-outline-secondary" title="Auch Projekte älter als 30 Tage">Ältere einblenden</a>
+    {% endif %}
+    <a href="/?top=20{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 20</a>
+    <a href="/?top=50{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 50</a>
+    <a href="/?top=100{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 100</a>
   </div>
 </div>
 
@@ -23,6 +28,7 @@
         <th>Remote</th>
         <th>Vertrag</th>
         <th class="skills-cell">Skills ✓</th>
+        <th>Status</th>
         <th>Gesehen</th>
       </tr>
     </thead>
@@ -50,6 +56,17 @@
         <td class="skills-cell text-success">
           {% if match.matched_skills %}
             {{ match.matched_skills[:4] | join(", ") }}{% if match.matched_skills|length > 4 %} <span class="text-muted">+{{ match.matched_skills|length - 4 }}</span>{% endif %}
+          {% endif %}
+        </td>
+        <td>
+          {% if proj.status.value == 'neu' %}
+            <span class="badge bg-primary">neu</span>
+          {% elif proj.status.value == 'gesehen' %}
+            <span class="badge bg-info text-dark">gesehen</span>
+          {% elif proj.status.value == 'beworben' %}
+            <span class="badge bg-success">beworben</span>
+          {% elif proj.status.value == 'abgelehnt' %}
+            <span class="badge bg-secondary">abgelehnt</span>
           {% endif %}
         </td>
         <td class="text-muted small">

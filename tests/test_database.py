@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from src.database import (
+    ProjectStatus,
     create_tables,
     ensure_project_exists,
     get_all_projects,
@@ -13,6 +14,7 @@ from src.database import (
     get_session_factory,
     get_top_matches,
     save_match_result,
+    update_project_status,
     upsert_project,
     upsert_projects,
 )
@@ -245,3 +247,29 @@ class TestIntegration:
         matches = get_match_results(session, 123)
         assert len(matches) == 1
         assert matches[0].score == 92.0
+
+
+class TestProjectStatus:
+    def test_default_status_is_neu(self, session: Session):
+        proj = upsert_project(session, SAMPLE_PROJECT)
+        session.commit()
+        assert proj.status == ProjectStatus.neu
+
+    def test_update_status(self, session: Session):
+        upsert_project(session, SAMPLE_PROJECT)
+        session.commit()
+        proj = update_project_status(session, 123, ProjectStatus.gesehen)
+        session.commit()
+        assert proj.status == ProjectStatus.gesehen
+
+    def test_update_status_to_beworben(self, session: Session):
+        upsert_project(session, SAMPLE_PROJECT)
+        session.commit()
+        update_project_status(session, 123, ProjectStatus.beworben)
+        session.commit()
+        proj = get_project(session, 123)
+        assert proj.status == ProjectStatus.beworben
+
+    def test_update_status_nonexistent(self, session: Session):
+        result = update_project_status(session, 999, ProjectStatus.gesehen)
+        assert result is None

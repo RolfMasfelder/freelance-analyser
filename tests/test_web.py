@@ -1,6 +1,6 @@
 """Tests für src/web.py — FastAPI Web-UI."""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from src.database import MatchResult, Project, create_tables
+from src.database import MatchResult, Project, ProjectStatus, create_tables
 from src.letter_generator import LetterResult
 from src.web import app, get_db
 
@@ -190,3 +190,93 @@ class TestLetterGeneration:
     def test_post_letter_nonexistent_project(self, client):
         response = client.post("/project/9999/letter")
         assert response.status_code == 404
+
+
+class TestProjectStatus:
+    def test_status_badge_shown_in_ranking(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/")
+        assert "neu" in response.text
+
+    def test_status_dropdown_shown_in_detail(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/project/1001")
+        assert 'name="status"' in response.text
+
+    def test_update_status(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.post(
+            "/project/1001/status",
+            data={"status": "beworben"},
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+        proj = db_session.get(Project, 1001)
+        assert proj.status == ProjectStatus.beworben
+
+    def test_update_status_invalid(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.post(
+            "/project/1001/status",
+            data={"status": "ungueltig"},
+        )
+        assert response.status_code == 400
+
+    def test_update_status_nonexistent_project(self, client, db_session):
+        response = client.post(
+            "/project/9999/status",
+            data={"status": "gesehen"},
+        )
+        assert response.status_code == 404
+
+
+class TestAgeFilter:
+    def test_old_projects_hidden_by_default(self, client, db_session):
+        """Projekte älter als 30 Tage werden standardmäßig ausgeblendet."""
+        old_date = datetime.now(UTC) - timedelta(days=45)
+        proj = Project(**SAMPLE_PROJECT, first_seen=old_date, last_seen=old_date)
+        db_session.add(proj)
+        db_session.flush()
+        match = MatchResult(
+            project_id=SAMPLE_PROJECT["project_id"],
+            score=80.0,
+            matched_skills=["Python"],
+            missing_skills=[],
+            notes="",
+            created_at=datetime.now(UTC),
+        )
+        db_session.add(match)
+        db_session.commit()
+        response = client.get("/")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" not in response.text
+
+    def test_old_projects_shown_with_filter(self, client, db_session):
+        """Alte Projekte werden mit include_old=true angezeigt."""
+        old_date = datetime.now(UTC) - timedelta(days=45)
+        proj = Project(**SAMPLE_PROJECT, first_seen=old_date, last_seen=old_date)
+        db_session.add(proj)
+        db_session.flush()
+        match = MatchResult(
+            project_id=SAMPLE_PROJECT["project_id"],
+            score=80.0,
+            matched_skills=["Python"],
+            missing_skills=[],
+            notes="",
+            created_at=datetime.now(UTC),
+        )
+        db_session.add(match)
+        db_session.commit()
+        response = client.get("/?include_old=true")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" in response.text
+
+    def test_recent_projects_always_shown(self, client, db_session):
+        """Aktuelle Projekte werden immer angezeigt."""
+        _add_project_with_match(db_session)
+        response = client.get("/")
+        assert "Senior Python Entwickler" in response.text
+
+    def test_filter_toggle_button_present(self, client, db_session):
+        response = client.get("/")
+        assert "include_old=true" in response.text
