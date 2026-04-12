@@ -4,9 +4,9 @@
 
 **Development with Python 3.13**: Use Python 3.13 syntax and libraries only
 **Tests required**: ALL features/bugfixes MUST have tests (unit + integration)
-**Development with venv**: Use virtual environment for local dev (python -m venv venv)
+**Development with venv**: Use virtual environment for local dev (python -m venv venv). Any new Terminal must use `source venv/bin/activate` before running Python commands. DO NOT install packages globally.
 **Git Commits**: Keep messages concise (feat/fix/refactor format). NO long descriptions. Only one line as commit-message
-**Docker first**: ALL commands via `docker compose exec freelance-analyser`
+**Always use Docker**: ALL commands via `docker compose exec freelance-analyser ...` (Container must be running). DO NOT run Python scripts directly on host.
 
 ## Architecture Basics
 
@@ -33,6 +33,9 @@ Email-Fetch → Email-Parse → Link-Extract → Scrape (mit Cookies) → Parse 
 
 ## Git Remotes
 - `origin` → Local mirror (NO CI)
+- `github` → Github mirror (→ PRs, Issues, CI)
+- always push to both remotes: `git push origin main && git push github main`
+
 
 ## Documentation (if needed)
 - Check `TODO.md` if needed
