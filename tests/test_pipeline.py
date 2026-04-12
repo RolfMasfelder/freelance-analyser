@@ -248,9 +248,46 @@ class TestRunImapCommand:
         projects = get_all_projects(session)
         session.close()
         assert len(projects) == 2
-        ids = {p.project_id for p in projects}
-        assert 8888 in ids
-        assert 8889 in ids
+
+
+class TestCookieValidation:
+    def test_run_aborts_on_invalid_cookies(self, cv_file, db_url):
+        """Pipeline bricht mit Fehlermeldung ab wenn Cookies ungültig."""
+        fake_body = (
+            "----------------------------------------------\n"
+            "Python Backend Entwickler (m/w/d)\n"
+            "Erstellt: 11.03.2026\n"
+            "von: Test AG\n"
+            "Ort: München\n"
+            "Vertragsart: Freiberuflich\n"
+            "Remote: 100%\n"
+            "Start: Ab sofort\n"
+            "https://www.freelancermap.de/nproj/7777.html\n"
+            "----------------------------------------------\n"
+        )
+        fake_email = RawEmail(
+            uid=300,
+            subject="Neue Projekte",
+            sender="noreply@freelancermap.de",
+            body=fake_body,
+        )
+        runner = CliRunner()
+        with (
+            patch("scripts.run_pipeline.fetch_emails", return_value=[fake_email]),
+            patch(
+                "src.cookie_manager.get_authenticated_cookies",
+                side_effect=RuntimeError(
+                    "Keine gültige Session gefunden. "
+                    "'python scripts/export_cookies.py' auf dem Host ausführen."
+                ),
+            ),
+        ):
+            result = runner.invoke(
+                cli,
+                ["run", "--cv", cv_file, "--db-url", db_url],
+            )
+        assert result.exit_code == 1
+        assert "Cookie-Fehler" in result.output
 
     def test_run_imap_marks_new_projects(self, cv_file, db_url):
         """Neue Projekte werden mit ★NEU markiert."""

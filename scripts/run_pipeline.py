@@ -121,7 +121,11 @@ def _phase_scrape(scrape: bool, projects_from_email: list, logger) -> list:
 
         logger.info("Starte Scraping von %d Projekten...", len(projects_from_email))
         urls = [p.url for p in projects_from_email if p.url]
-        cookies = get_authenticated_cookies()
+        try:
+            cookies = get_authenticated_cookies()
+        except RuntimeError as e:
+            click.echo(f"\n✗ Cookie-Fehler: {e}", err=True)
+            raise SystemExit(1) from e
         html_map = scrape_project_pages(urls, cookies)
         logger.info("%d Projektseiten gescraped", len(html_map))
         for url, html in html_map.items():
