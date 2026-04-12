@@ -11,7 +11,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 FREELANCERMAP_DOMAIN = "freelancermap.de"
-AUTH_CHECK_URL = "https://www.freelancermap.de/projektboerse.html"
+AUTH_CHECK_URL = "https://www.freelancermap.de/projekte"
 COOKIE_FILE = Path(__file__).parent.parent / "data/cookies/freelancermap.json"
 
 
@@ -109,8 +109,8 @@ def get_authenticated_cookies() -> httpx.Cookies:
 
     raise RuntimeError(
         "Keine gültige Session gefunden. "
-        "Im Container: 'python scripts/export_cookies.py' auf dem Host ausführen. "
-        "Auf dem Host: Im Browser bei freelancermap.de einloggen."
+        "'python scripts/export_cookies.py' auf dem Host ausführen. "
+        "Ggf. im Browser bei freelancermap.de neu einloggen."
     )
 
 
