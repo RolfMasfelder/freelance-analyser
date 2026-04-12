@@ -40,6 +40,11 @@ Alle Befehle werden über Docker Compose ausgeführt (Container muss laufen):
 # Hilfe anzeigen
 docker compose exec freelance-analyser python scripts/run_pipeline.py --help
 
+# Cookies exportieren (auf dem HOST, nicht im Container!)
+# → Benötigt Firefox mit gültiger freelancermap.de-Session
+# → Speichert Cookies nach data/cookies/freelancermap.json
+python scripts/export_cookies.py
+
 # Neue E-Mails via IMAP abholen → scrapen → DB → Match → Rank (Standard)
 docker compose exec freelance-analyser python scripts/run_pipeline.py run
 
