@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CV Profile",
+  "description": "Schema für data/cv.yaml — Freelancer-Profil für Skill-Matching und Antwortschreiben.",
+  "type": "object",
+  "required": ["name", "skills"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Vollständiger Name des Freelancers.",
+      "minLength": 1
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefonnummer (optional)."
+    },
+    "email": {
+        "type": "string",
+        "description": "E-Mail-Adresse (optional).",
+        "format": "email"
+    },
+    "title": {
+      "type": "string",
+      "description": "Berufsbezeichnung / Titel."
+    },
+    "experience_years": {
+      "type": "integer",
+      "description": "Berufserfahrung in Jahren.",
+      "minimum": 0
+    },
+    "skills": {
+      "type": "array",
+      "description": "Primäre Skills (hohe Gewichtung) — aktueller Schwerpunkt, max. 15–20.",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "skills_secondary": {
+      "type": "array",
+      "description": "Sekundäre Skills (niedrigere Gewichtung) — weitere Technologien und Tools.",
+      "items": { "type": "string" }
+    },
+    "preferred_locations": {
+      "type": "array",
+      "description": "Bevorzugte Standorte (z.B. 'Remote', 'München').",
+      "items": { "type": "string" }
+    },
+    "preferred_remote": {
+      "type": "string",
+      "description": "Bevorzugter Remote-Anteil (z.B. '100%')."
+    },
+    "preferred_contract_types": {
+      "type": "array",
+      "description": "Bevorzugte Vertragsarten (z.B. 'Freiberuflich', 'Contracting').",
+      "items": { "type": "string" }
+    },
+    "exclude_skills": {
+      "type": "array",
+      "description": "Skills die zum Ausschluss führen (Score = 0).",
+      "items": { "type": "string" }
+    },
+    "exclude_industries": {
+      "type": "array",
+      "description": "Branchen die zum Ausschluss führen.",
+      "items": { "type": "string" }
+    },
+    "min_duration_months": {
+      "type": "integer",
+      "description": "Minimale Projektlaufzeit in Monaten.",
+      "minimum": 0
+    },
+    "keywords": {
+      "type": "array",
+      "description": "Bonus-Keywords für Scoring (kleingeschrieben).",
+      "items": { "type": "string" }
+    },
+    "experience": {
+      "type": "array",
+      "description": "Projekthistorie / Berufserfahrung mit Kontext (Rolle, Beschreibung, Skills).",
+      "items": {
+        "type": "object",
+        "required": ["role", "project", "description"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Tatsächliche Rolle im Projekt (z.B. 'Entwickler', 'Berater')."
+          },
+          "project": {
+            "type": "string",
+            "description": "Projektname oder -beschreibung."
+          },
+          "description": {
+            "type": "string",
+            "description": "Konkrete Tätigkeiten und Aufgaben im Projekt."
+          },
+          "skills": {
+            "type": "array",
+            "description": "Im Projekt eingesetzte Skills.",
+            "items": { "type": "string" }
+          },
+          "company": {
+            "type": "string",
+            "description": "Unternehmen / Kunde (optional)."
+          },
+          "period": {
+            "type": "string",
+            "description": "Zeitraum (z.B. '2020–2022')."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
