@@ -45,10 +45,14 @@ E-Mail abholen → Parsen → Links extrahieren → Projektseiten scrapen → Pr
 
 ### Automatisierung
 
-- [ ] Alembic-Migrationen einrichten
-- [ ] .dockerignore anlegen (venv, __pycache__, .git, data/projects)
+- [x] Alembic-Migrationen einrichten
+- [x] .dockerignore anlegen (venv, __pycache__, .git, data/projects)
+
+### Web-UI
+
+- [x] Filter für Projekte älter als 30 Tage (ein-/ausblendbar)
 
 ### Später / Nice-to-have
 
-- [ ] Historisierung (wann Projekt gesehen, Status-Änderungen)
-- [ ] Benachrichtigung bei neuen Top-Treffern
+- [x] Historisierung (wann Projekt gesehen, Status-Änderungen)
+- [ ] Benachrichtigung bei neuen Top-Treffern *(wird noch überlegt)*

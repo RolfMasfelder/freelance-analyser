@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.cv_manager import load_cv
+from src.cv_manager import ExperienceEntry, load_cv
 
 
 @pytest.fixture()
@@ -34,6 +34,22 @@ min_duration_months: 3
 keywords:
   - backend
   - cloud
+experience:
+  - role: "Entwickler"
+    project: "API-Plattform"
+    company: "Firma X"
+    period: "2021–2023"
+    description: "REST-API-Entwicklung mit Python."
+    skills:
+      - Python
+      - Docker
+  - role: "Berater"
+    project: "Java-Migration"
+    company: "Firma Y"
+    period: "2019–2021"
+    description: "Mitarbeit an der Migration auf Java 17."
+    skills:
+      - Java
 """
     path = tmp_path / "cv.yaml"
     path.write_text(content, encoding="utf-8")
@@ -100,6 +116,28 @@ class TestLoadCV:
         cv = load_cv(cv_yaml)
         for skill in cv.skills + cv.skills_secondary + cv.exclude_skills:
             assert skill == skill.lower()
+
+    def test_load_experience(self, cv_yaml):
+        cv = load_cv(cv_yaml)
+        assert len(cv.experience) == 2
+        assert isinstance(cv.experience[0], ExperienceEntry)
+        assert cv.experience[0].role == "Entwickler"
+        assert cv.experience[0].project == "API-Plattform"
+        assert cv.experience[0].company == "Firma X"
+        assert cv.experience[0].period == "2021–2023"
+        assert "python" in cv.experience[0].skills
+
+    def test_experience_skills_lowercased(self, cv_yaml):
+        cv = load_cv(cv_yaml)
+        for entry in cv.experience:
+            for skill in entry.skills:
+                assert skill == skill.lower()
+
+    def test_no_experience_field(self, tmp_path):
+        path = tmp_path / "no_exp.yaml"
+        path.write_text("name: Test\nskills:\n  - Go\n", encoding="utf-8")
+        cv = load_cv(path)
+        assert cv.experience == []
 
     def test_real_cv_file(self):
         """Integration: Echte CV-Datei laden."""

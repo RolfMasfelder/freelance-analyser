@@ -1,6 +1,8 @@
 """Web-UI — FastAPI-App für Projektrankings (FastAPI + Jinja2)."""
 
 import functools
+import logging
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Request
@@ -10,7 +12,16 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.config import Settings
-from src.database import MatchResult, Project, get_engine, get_session_factory
+from src.cv_manager import load_cv
+from src.database import (
+    MatchResult,
+    Project,
+    ProjectStatus,
+    get_engine,
+    get_session_factory,
+    update_project_status,
+)
+from src.letter_generator import generate_letter
 
 _TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
@@ -34,24 +45,35 @@ def get_db():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def ranking(request: Request, session: Session = Depends(get_db), top: int = 50):
+async def ranking(
+    request: Request,
+    session: Session = Depends(get_db),
+    top: int = 50,
+    include_old: bool = False,
+):
     top = max(1, min(top, 500))
     subq = (
         session.query(func.max(MatchResult.id).label("max_id"))
         .group_by(MatchResult.project_id)
         .subquery()
     )
-    results = (
+    query = (
         session.query(MatchResult, Project)
         .join(subq, MatchResult.id == subq.c.max_id)
         .join(Project, MatchResult.project_id == Project.project_id)
-        .order_by(MatchResult.score.desc())
-        .limit(top)
-        .all()
     )
+    if not include_old:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+        query = query.filter(Project.first_seen >= cutoff)
+    results = query.order_by(MatchResult.score.desc()).limit(top).all()
     return templates.TemplateResponse(
         "ranking.html",
-        {"request": request, "results": results, "top": top},
+        {
+            "request": request,
+            "results": results,
+            "top": top,
+            "include_old": include_old,
+        },
     )
 
 
@@ -74,3 +96,73 @@ async def project_detail(
         "project.html",
         {"request": request, "project": project, "match": match},
     )
+
+
+log = logging.getLogger(__name__)
+
+
+@app.post("/project/{project_id}/letter", response_class=HTMLResponse)
+async def generate_project_letter(
+    request: Request,
+    project_id: int,
+    session: Session = Depends(get_db),
+):
+    """Generiert ein Antwortschreiben per LLM für ein Projekt."""
+    project = session.get(Project, project_id)
+    if project is None:
+        return HTMLResponse("<h1>Projekt nicht gefunden</h1>", status_code=404)
+
+    match = (
+        session.query(MatchResult)
+        .filter(MatchResult.project_id == project_id)
+        .order_by(MatchResult.created_at.desc())
+        .first()
+    )
+
+    matched_skills = match.matched_skills if match else None
+    error = None
+    letter_result = None
+
+    try:
+        settings = Settings()
+        cv = load_cv(settings.cv_path)
+        letter_result = generate_letter(project, cv, matched_skills, settings)
+    except Exception as exc:
+        log.exception("Fehler bei Antwortschreiben-Generierung")
+        error = str(exc)
+
+    return templates.TemplateResponse(
+        "project.html",
+        {
+            "request": request,
+            "project": project,
+            "match": match,
+            "letter": letter_result.letter if letter_result else None,
+            "letter_model": letter_result.model if letter_result else None,
+            "letter_error": error,
+        },
+    )
+
+
+@app.post("/project/{project_id}/status", response_class=HTMLResponse)
+async def update_status(
+    request: Request,
+    project_id: int,
+    session: Session = Depends(get_db),
+):
+    """Aktualisiert den Status eines Projekts."""
+    form = await request.form()
+    status_value = form.get("status", "")
+    try:
+        new_status = ProjectStatus(status_value)
+    except ValueError:
+        return HTMLResponse("Ungültiger Status", status_code=400)
+
+    project = update_project_status(session, project_id, new_status)
+    if project is None:
+        return HTMLResponse("Projekt nicht gefunden", status_code=404)
+    session.commit()
+
+    from starlette.responses import RedirectResponse
+
+    return RedirectResponse(url=f"/project/{project_id}", status_code=303)

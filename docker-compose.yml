@@ -2,6 +2,7 @@ services:
   freelance-analyser:
     build: .
     container_name: freelance-analyser
+    user: "1234:1234"
     env_file: .env
     volumes:
       - .:/app:z
@@ -15,6 +16,7 @@ services:
   web:
     build: .
     container_name: freelance-analyser-web
+    user: "1234:1234"
     command: uvicorn src.web:app --host 0.0.0.0 --port 8080 --reload
     env_file: .env
     volumes:

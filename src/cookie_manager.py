@@ -109,8 +109,8 @@ def get_authenticated_cookies() -> httpx.Cookies:
 
     raise RuntimeError(
         "Keine gültige Session gefunden. "
-        "Im Container: 'python scripts/export_cookies.py' auf dem Host ausführen. "
-        "Auf dem Host: Im Browser bei freelancermap.de einloggen."
+        "'python scripts/export_cookies.py' auf dem Host ausführen. "
+        "Ggf. im Browser bei freelancermap.de neu einloggen."
     )
 
 
