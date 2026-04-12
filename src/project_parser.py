@@ -8,6 +8,70 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+# Häufige Wörter für Spracherkennung (Stoppwörter + branchentypische Begriffe)
+_EN_MARKERS = frozenset(
+    {
+        "the",
+        "and",
+        "for",
+        "you",
+        "with",
+        "are",
+        "will",
+        "our",
+        "your",
+        "this",
+        "from",
+        "that",
+        "have",
+        "experience",
+        "looking",
+        "required",
+        "responsibilities",
+        "requirements",
+        "should",
+        "must",
+    }
+)
+_DE_MARKERS = frozenset(
+    {
+        "und",
+        "die",
+        "der",
+        "wir",
+        "für",
+        "ein",
+        "eine",
+        "den",
+        "des",
+        "ist",
+        "von",
+        "mit",
+        "auf",
+        "als",
+        "sich",
+        "suchen",
+        "erfahrung",
+        "kenntnisse",
+        "anforderungen",
+        "aufgaben",
+    }
+)
+
+
+def _detect_language(text: str) -> str:
+    """Erkennt die Sprache eines Textes anhand häufiger Wörter.
+
+    Returns:
+        ISO-639-1 Sprachcode ('de' oder 'en'). Default: 'de'.
+    """
+    words = re.findall(r"[a-zäöüß]+", text.lower())
+    if not words:
+        return "de"
+    en_count = sum(1 for w in words if w in _EN_MARKERS)
+    de_count = sum(1 for w in words if w in _DE_MARKERS)
+    return "en" if en_count > de_count else "de"
+
 
 @dataclass
 class ProjectDetail:
@@ -27,6 +91,7 @@ class ProjectDetail:
     duration: str
     utilization: str
     skills: list[str] = field(default_factory=list)
+    language: str = "de"
     url: str = ""
 
 
@@ -49,6 +114,7 @@ def parse_project_html(html: str, url: str = "") -> ProjectDetail:
     location, country, industry, remote, contract_type, start, duration, utilization = (
         _get_header_info(soup)
     )
+    language = _detect_language(title + " " + description)
 
     # Projekt-ID aus URL als Fallback
     if not project_id and url:
@@ -71,6 +137,7 @@ def parse_project_html(html: str, url: str = "") -> ProjectDetail:
         duration=duration,
         utilization=utilization,
         skills=skills,
+        language=language,
         url=url,
     )
 

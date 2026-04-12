@@ -27,10 +27,17 @@ pyyaml
 rapidfuzz
 scikit-learn
 
+# LLM
+openai
+
+# ODT-Parsing
+odfpy
+
 # Web-UI
 fastapi
 uvicorn[standard]
 jinja2
+python-multipart
 
 # Testing
 pytest

@@ -1,5 +1,8 @@
 {
     "chat.tools.terminal.autoApprove": {
         "pip": true
+    },
+    "yaml.schemas": {
+        "./data/cv.schema.json": "data/cv*.yaml"
     }
 }
