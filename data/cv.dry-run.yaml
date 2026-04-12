@@ -1,0 +1,65 @@
+name: "Rolf Masfelder"
+title: "Selbstständiger IT-Berater"
+experience_years: 39
+
+skills:
+  - Python
+  - PostgreSQL
+  - Django
+  - Docker
+  - Kubernetes
+  - Vue.js
+  - REST API
+  - OpenAPI / Swagger
+  - gRPC / Protobuf
+  - CI/CD (Jenkins)
+  - PL/pgSQL
+
+skills_secondary:
+  - Oracle (EnterpriseDB)
+  - PL/SQL
+  - Java
+  - MQTT
+  - IBM Websphere MQ
+  - Git / Github / SVN
+  - Maven
+  - Nexus
+  - Tomcat / TOMEE
+  - Linux (Shell scripting)
+  - React
+  - Playwright
+  - TensorFlow / Keras
+  - AWS (S3)
+  - Raspberry Pi
+  - Jira / Confluence
+
+preferred_locations:
+  - Andernach
+
+preferred_remote: ""
+
+preferred_contract_types:
+  - Selbstständig
+
+min_duration_months: 3
+
+exclude_skills:
+  - SAP
+  - ABAP
+  - Cobol
+  - Mainframe
+  - .NET
+
+exclude_industries: []
+
+keywords:
+  - cloud computing
+  - devops
+  - backend development
+  - api development
+  - database administration
+  - frontend development
+  - linux administration
+  - automation
+  - artificial intelligence
+  - machine learning

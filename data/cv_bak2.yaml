@@ -1,0 +1,148 @@
+name: "Rolf Masfelder"
+title: "Diplom-Informatiker (FH) — Geschäftsführer Nector IT GmbH"
+phone: "+49 160 8064181"
+email: "rolf.masfelder@nector-it-gmbh.de"
+experience_years: 39
+
+# Primäre Skills (hohe Gewichtung) — aus aktuellem Schwerpunkt & jüngsten Projekten
+skills:
+  - Python
+  - Java
+  - PostgreSQL
+  - Oracle
+  - SQL
+  - PL/SQL
+  - PL/pgSQL
+  - Docker
+  - Kubernetes
+  - Django
+  - Git
+  - CI/CD
+  - Jenkins
+  - Maven
+  - REST
+  - Agile
+  - Scrum
+  - Vue.js
+  - React
+  - REST API Design
+  - Linux
+  - arc42
+  - req42
+
+# Sekundäre Skills (niedrigere Gewichtung)
+skills_secondary:
+  - gRPC
+  - protobuf
+  - OpenAPI
+  - Swagger
+  - Playwright
+  - MQTT
+  - TensorFlow
+  - Keras
+  - AWS
+  - XML
+  - XSLT
+  - SQLite
+  - JavaScript
+  - Jira
+  - Confluence
+  - Monitoring
+  - Performance Tuning
+  - Datenbankadministration
+  - Datenbankoptimierung
+  - Shell Scripting
+  - SSH
+  - Raspberry Pi
+
+# Präferenzen
+preferred_locations:
+  - Andernach
+  - Remote
+preferred_remote: "100%"
+preferred_contract_types:
+  - Freiberuflich
+  - Contracting
+min_duration_months: 3
+
+# Ausschluss-Kriterien (Score = 0)
+exclude_skills:
+  - SAP
+  - ABAP
+  - Cobol
+  - Mainframe
+  - .NET
+exclude_industries: []
+
+# Bonus-Keywords in Projektbeschreibungen
+keywords:
+  - cloud
+  - devops
+  - backend
+  - api
+  - automatisierung
+  - datenbank
+  - data engineering
+  - machine learning
+  - ki
+  - e-rechnung
+  - blockchain
+  - postgresql
+  - python
+  - migration
+  - performance
+  - monitoring
+  - docker
+  - kubernetes
+
+# Projekthistorie — Tatsächliche Erfahrungen mit Rolle und Kontext.
+# WICHTIG: Rolle exakt angeben (z.B. "Entwickler", nicht "Projektleiter",
+# wenn keine Leitung stattfand). Das LLM nutzt diese Einträge als einzige
+# Quelle für Erfahrungsaussagen im Antwortschreiben.
+experience:
+  - role: "Softwareentwickler"
+    project: "Oracle-zu-PostgreSQL Datenbank-Migration"
+    company: "Beispiel AG"
+    period: "2019–2021"
+    description: >
+      Mitarbeit im Migrationsteam. Entwicklung von SQL-Migrationsskripten,
+      Datenvalidierung und Performance-Tests. Keine Projektleitung.
+    skills:
+      - Oracle
+      - PostgreSQL
+      - SQL
+      - PL/SQL
+      - Migration
+
+  - role: "Backend-Entwickler"
+    project: "REST-API-Plattform"
+    company: "Beispiel GmbH"
+    period: "2021–2023"
+    description: >
+      Entwicklung und Wartung von REST-APIs mit Python/Django.
+      Container-Deployment mit Docker und Kubernetes.
+      CI/CD-Pipeline mit Jenkins aufgebaut.
+    skills:
+      - Python
+      - Django
+      - Docker
+      - Kubernetes
+      - REST
+      - Jenkins
+      - CI/CD
+      - Git
+
+  - role: "Datenbankentwickler"
+    project: "Performance-Optimierung Oracle-Datenbank"
+    company: "Beispiel Corp"
+    period: "2017–2019"
+    description: >
+      PL/SQL-Entwicklung und Datenbankoptimierung.
+      Analyse und Behebung von Performance-Engpässen.
+      Monitoring-Dashboards erstellt.
+    skills:
+      - Oracle
+      - PL/SQL
+      - SQL
+      - Performance Tuning
+      - Monitoring
