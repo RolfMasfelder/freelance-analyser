@@ -16,33 +16,62 @@ skills:
   - Java
   - Docker
   - Kubernetes
+  - KI
+  - LLMs
+  - Anthropic Claude
+  - lmstudio
+  - ollama
+  - k8s
+  - k3s
   - Django
   - Vue.js
   - JavaScript
   - XML/XSLT
+  - datenbanken
+  - relationale Datenbanken
   - Oracle Database Tuning
-  - CI/CD (Jenkins, GitHub Actions)
+  - Datenbank Tuning
+  - Datenbank Design
+  - datenbankstrukturen
+  - Datenmodellierung
+  - normalisierung
+  - performance-tuning
+  - ETL-Prozesse
+  - ETL
+  - versioncontrol
+  - git
+  - CI/CD
+  - Jenkins
+  - github
+  - GitHub Actions
   - Terraform / Ansible (inferred from DevOps mentions)
   - TensorFlow/Keras
   - gRPC & Protobuf
   - RESTful APIs
   - REST API Design
-  - OpenAPI/Swagger
+  - OpenAPI
   - Linux
   - Linux Shell Scripting
+  - scrum
+  - certified Product Owner
+  - PO
+  - softwareentwicklung
+  - backend
+  - debugging
   - arc42
   - req42
 
 
 skills_secondary:
-  - Java
   - C/C++
   - T-SQL
   - Oracle Forms & Reports
   - Microsoft SQL Server
   - IBM WebSphere MQ
-  - SVN, Git, GitHub, Bitbucket
-  - Maven, Gradle
+  - SVN
+  - Bitbucket
+  - Maven
+  - Gradle
   - Spring Framework (Spring Boot, Integration)
   - Hibernate / JPA
   - Eclipse/STS
@@ -50,7 +79,7 @@ skills_secondary:
   - AWS S3
 
 experience:
-  - role: "Entwickler"
+  - role: "FullStack Entwickler"
     project: "E-Rechnung Umsetzung"
     company: "Nector IT GmbH"
     period: "2024–2026"
@@ -68,11 +97,13 @@ experience:
       - Django
       - Docker
       - Kubernetes
+      - k8s
+      - k3s
       - CI/CD
       - Prometheus & Grafana
       - Playwright
 
-  - role: "Entwickler"
+  - role: "FullStack Entwickler"
     project: "Bitcoin-Blockchain Auslese & Analyse"
     company: "Selbstständig (Nector IT GmbH)"
     period: "2024"
@@ -84,7 +115,7 @@ experience:
       - PostgreSQL
       - Docker
 
-  - role: "Entwickler & Systemarchitekt"
+  - role: "FullStack Entwickler & Systemarchitekt"
     project: "Mess- und Gesundheitsmonitoring Lithium‑Ionen‑Akkus"
     company: "DEKRA"
     period: "2022–2023"
@@ -100,7 +131,7 @@ experience:
       - Raspberry Pi
       - AWS S3
 
-  - role: "Entwickler & Bildverarbeitungsspezialist"
+  - role: "FullStack Entwickler & Bildverarbeitungsspezialist"
     project: "Greenkeeper — Autonome Pflanzen‑Erkennung"
     company: "Selbstständig (Nector IT GmbH)"
     period: "2020–2022"
@@ -129,6 +160,7 @@ experience:
       - PL/SQL
       - SQL
       - Tuning
+      - ETL-Prozesse
 
   - role: "Support Engineer"
     project: "Second-Level Support (Telekom)"
@@ -225,6 +257,26 @@ experience:
       - SQL-Developer
       - PL/SQL
       - Liquibase
+
+  - role: "Oracle Entwickler"
+    project: "Datenmigrationen & Datenbereinigung"
+    company: "Deutsche Telekom"
+    period: "2007–2013"
+    description: |
+      Analyse, Bereinigung und Migrationen von Datenbeständen bei Deutsche Telekom
+      von 2007 bis 2013 mehrere Projekte im Umfeld der Deutsche Telekom, jeweils als Oracle-
+      Entwickler mit Schwerpunkt PL/SQL; XDB mit oop; Prozess-Automatisierung und PerformanceTuning
+      Projektbezeichnungen: OPUS; Wall-E; Migration CRM-T Stufe3/4; Migration CRM-T Stufe2
+    skills:
+      - SQL
+      - PL/SQL
+      - JAVA
+      - XML
+      - ETL
+      - DBA
+      - Datenmodellierung
+      - Datenbank Design
+      - Performance-Tuning
 
 preferred_locations:
   - Andernach
