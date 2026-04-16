@@ -50,6 +50,7 @@ async def ranking(
     session: Session = Depends(get_db),
     top: int = 50,
     include_old: bool = False,
+    status: str = "neu",
 ):
     top = max(1, min(top, 500))
     subq = (
@@ -64,7 +65,13 @@ async def ranking(
     )
     if not include_old:
         cutoff = datetime.now(timezone.utc) - timedelta(days=30)
-        query = query.filter(Project.first_seen >= cutoff)
+        query = query.filter(Project.last_seen >= cutoff)
+    if status != "alle":
+        try:
+            query = query.filter(Project.status == ProjectStatus(status))
+        except ValueError:
+            pass
+    all_statuses = [s.value for s in ProjectStatus]
     results = query.order_by(MatchResult.score.desc()).limit(top).all()
     return templates.TemplateResponse(
         "ranking.html",
@@ -73,6 +80,8 @@ async def ranking(
             "results": results,
             "top": top,
             "include_old": include_old,
+            "status": status,
+            "all_statuses": all_statuses,
         },
     )
 

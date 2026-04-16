@@ -280,3 +280,76 @@ class TestAgeFilter:
     def test_filter_toggle_button_present(self, client, db_session):
         response = client.get("/")
         assert "include_old=true" in response.text
+
+    def test_old_first_seen_recent_last_seen_shown(self, client, db_session):
+        """Projekte mit altem first_seen aber aktuellem last_seen werden angezeigt."""
+        old_date = datetime.now(UTC) - timedelta(days=45)
+        proj = Project(
+            **SAMPLE_PROJECT, first_seen=old_date, last_seen=datetime.now(UTC)
+        )
+        db_session.add(proj)
+        db_session.flush()
+        match = MatchResult(
+            project_id=SAMPLE_PROJECT["project_id"],
+            score=80.0,
+            matched_skills=["Python"],
+            missing_skills=[],
+            notes="",
+            created_at=datetime.now(UTC),
+        )
+        db_session.add(match)
+        db_session.commit()
+        response = client.get("/")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" in response.text
+
+
+class TestStatusFilter:
+    def test_default_shows_only_neu(self, client, db_session):
+        """Default-Filter zeigt nur Projekte mit Status 'neu'."""
+        _add_project_with_match(db_session)
+        proj = db_session.get(Project, SAMPLE_PROJECT["project_id"])
+        proj.status = ProjectStatus.gesehen
+        db_session.commit()
+        response = client.get("/")
+        assert "Senior Python Entwickler" not in response.text
+
+    def test_default_shows_neu_projects(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/")
+        assert "Senior Python Entwickler" in response.text
+
+    def test_filter_gesehen(self, client, db_session):
+        _add_project_with_match(db_session)
+        proj = db_session.get(Project, SAMPLE_PROJECT["project_id"])
+        proj.status = ProjectStatus.gesehen
+        db_session.commit()
+        response = client.get("/?status=gesehen")
+        assert "Senior Python Entwickler" in response.text
+
+    def test_filter_abgelehnt_hides_from_default(self, client, db_session):
+        _add_project_with_match(db_session)
+        proj = db_session.get(Project, SAMPLE_PROJECT["project_id"])
+        proj.status = ProjectStatus.abgelehnt
+        db_session.commit()
+        response = client.get("/")
+        assert "Senior Python Entwickler" not in response.text
+
+    def test_filter_alle_shows_all(self, client, db_session):
+        _add_project_with_match(db_session)
+        proj = db_session.get(Project, SAMPLE_PROJECT["project_id"])
+        proj.status = ProjectStatus.abgelehnt
+        db_session.commit()
+        response = client.get("/?status=alle")
+        assert "Senior Python Entwickler" in response.text
+
+    def test_status_buttons_present(self, client, db_session):
+        response = client.get("/")
+        assert "status=alle" in response.text
+        assert "status=neu" in response.text
+        assert "status=abgelehnt" in response.text
+
+    def test_invalid_status_ignored(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/?status=ungueltig")
+        assert response.status_code == 200
