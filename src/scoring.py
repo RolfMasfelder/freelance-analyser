@@ -36,18 +36,17 @@ class ScoredProject:
 
 
 def _calc_skill_score(match: MatchDetail, cv: CVProfile) -> float:
-    """Berechnet Skill-Score: Anteil gematchter Skills an Gesamt-CV-Skills (0–100)."""
-    total = len(cv.all_skills)
-    if total == 0:
+    """Berechnet Skill-Score: Anteil abgedeckter Projekt-Skills (0–100).
+
+    Primäre CV-Skills zählen doppelt, sekundäre einfach.
+    Denominator = Anzahl Projekt-Skills (matched + missing).
+    """
+    total_project_skills = len(match.matched_skills) + len(match.missing_skills)
+    if total_project_skills == 0:
         return 0.0
-    # Primäre Skills zählen doppelt
     primary_matched = sum(1 for s in match.matched_skills if s in cv.skills)
     secondary_matched = sum(1 for s in match.matched_skills if s in cv.skills_secondary)
-    weighted = (
-        (primary_matched * 2.0 + secondary_matched)
-        / (len(cv.skills) * 2.0 + len(cv.skills_secondary))
-        * 100
-    )
+    weighted = (primary_matched * 2.0 + secondary_matched) / total_project_skills * 100
     return min(weighted, 100.0)
 
 
