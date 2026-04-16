@@ -27,7 +27,7 @@ auf Projektausschreibungen verfasst. Du schreibst sachlich und \
 - Die relevanten Skills und Erfahrungen des Freelancers hervorheben, \
 die zum Projekt passen
 - Konkret auf die Projektanforderungen eingehen
-- Kurz und prägnant sein (max. 300 Wörter)
+- Kurz und prägnant sein (max. 350 Wörter)
 - Professionell aber nicht übertrieben förmlich klingen
 
 WICHTIG — Strenge Regeln für Erfahrungsangaben:
