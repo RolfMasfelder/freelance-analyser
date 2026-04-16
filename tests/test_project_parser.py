@@ -35,12 +35,37 @@ class TestParseProjectHtmlUnit:
         <div>12345</div>
     </div>
     <div class="project-body-badges">
-        <span>Python</span>
-        <span>Django</span>
-        <span>PostgreSQL</span>
+        <span class="badge badge-grey">Python</span>
+        <span class="badge badge-grey">Django</span>
+        <span class="badge badge-grey">PostgreSQL</span>
     </div>
     <div class="project-body-description">
         Wir suchen einen Python Entwickler für ein spannendes Projekt.
+    </div>
+    </body></html>
+    """
+
+    MINIMAL_HTML_NEW = """
+    <html><body>
+    <div class="project-header">
+        <h1>Java Entwickler gesucht</h1>
+        <span class="badge">IT</span>
+        <span class="location-element">München,</span>
+        <span class="location-element">Deutschland</span>
+        <span class="element-with-divider">100%Remote</span>
+        <span class="element-with-divider">Freiberuflich</span>
+    </div>
+    <div class="project-body-info">
+        <div class="project-body-info-title">Projekt-ID</div>
+        <div>99999</div>
+    </div>
+    <div class="project-body-badges">
+        <span class="badge badge-outline-black">IT</span>
+        <a class="badge badge-grey text-truncate no-hover" data-id="project-body-keyword-link" href="/projekte/java">Java</a>
+        <a class="badge badge-grey text-truncate no-hover" data-id="project-body-keyword-link" href="/projekte/spring-boot">Spring Boot</a>
+    </div>
+    <div class="project-body-description">
+        Wir suchen einen Java Entwickler mit Spring Boot Erfahrung.
     </div>
     </body></html>
     """
@@ -116,6 +141,16 @@ class TestParseProjectHtmlUnit:
         )
         result = parse_project_html(html)
         assert result.language == "en"
+
+    def test_skills_new_html_format(self):
+        """Skills als <a>-Tags (neues freelancermap-Layout ab April 2026)."""
+        result = parse_project_html(self.MINIMAL_HTML_NEW)
+        assert result.skills == ["Java", "Spring Boot"]
+
+    def test_skills_new_html_excludes_industry_badge(self):
+        """Industry-Badge (badge-outline-black) wird nicht als Skill extrahiert."""
+        result = parse_project_html(self.MINIMAL_HTML_NEW)
+        assert "IT" not in result.skills
 
 
 class TestDetectLanguage:
