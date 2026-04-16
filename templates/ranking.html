@@ -2,18 +2,27 @@
 {% block title %} — Ranking{% endblock %}
 
 {% block content %}
+{% set qs = "&include_old=true" if include_old else "" %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2 class="mb-0">Top-{{ top }} Projekte</h2>
   <div class="d-flex gap-2 align-items-center">
     {% if include_old %}
-      <a href="/?top={{ top }}" class="btn btn-sm btn-outline-warning" title="Nur Projekte der letzten 30 Tage">Ältere ausblenden</a>
+      <a href="/?top={{ top }}&status={{ status }}" class="btn btn-sm btn-outline-warning" title="Nur Projekte der letzten 30 Tage">Ältere ausblenden</a>
     {% else %}
-      <a href="/?top={{ top }}&include_old=true" class="btn btn-sm btn-outline-secondary" title="Auch Projekte älter als 30 Tage">Ältere einblenden</a>
+      <a href="/?top={{ top }}&status={{ status }}&include_old=true" class="btn btn-sm btn-outline-secondary" title="Auch Projekte älter als 30 Tage">Ältere einblenden</a>
     {% endif %}
-    <a href="/?top=20{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 20</a>
-    <a href="/?top=50{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 50</a>
-    <a href="/?top=100{% if include_old %}&include_old=true{% endif %}" class="btn btn-sm btn-outline-secondary">Top 100</a>
+    <a href="/?top=20&status={{ status }}{{ qs }}" class="btn btn-sm btn-outline-secondary">Top 20</a>
+    <a href="/?top=50&status={{ status }}{{ qs }}" class="btn btn-sm btn-outline-secondary">Top 50</a>
+    <a href="/?top=100&status={{ status }}{{ qs }}" class="btn btn-sm btn-outline-secondary">Top 100</a>
   </div>
+</div>
+
+<div class="d-flex gap-1 mb-3">
+  <span class="text-muted me-1 align-self-center">Status:</span>
+  <a href="/?top={{ top }}&status=alle{{ qs }}" class="btn btn-sm {% if status == 'alle' %}btn-dark{% else %}btn-outline-secondary{% endif %}">Alle</a>
+  {% for s in all_statuses %}
+    <a href="/?top={{ top }}&status={{ s }}{{ qs }}" class="btn btn-sm {% if status == s %}btn-dark{% else %}btn-outline-secondary{% endif %}">{{ s|capitalize }}</a>
+  {% endfor %}
 </div>
 
 {% if results %}
