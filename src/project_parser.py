@@ -187,9 +187,9 @@ def _get_skills(soup: BeautifulSoup) -> list[str]:
     if not badges_div:
         return []
     return [
-        span.get_text(strip=True)
-        for span in badges_div.find_all("span")
-        if span.get_text(strip=True)
+        el.get_text(strip=True)
+        for el in badges_div.find_all(class_="badge-grey")
+        if el.get_text(strip=True)
     ]
 
 
