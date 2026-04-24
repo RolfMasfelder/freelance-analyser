@@ -25,6 +25,7 @@ skills:
   - k3s
   - Django
   - Vue.js
+  - Node.js
   - JavaScript
   - XML/XSLT
   - datenbanken
@@ -92,6 +93,7 @@ experience:
       - Python
       - Vue.js
       - JavaScript
+      - Node.js
       - XML/XSLT
       - PostgreSQL
       - Django
@@ -109,7 +111,7 @@ experience:
     period: "2024"
     description: |
       Aufbau einer PostgreSQL‑Datenbank in Docker-Containern zur Speicherung von -600 GB Blockchain‑Daten.
-      Entwicklung von ETL-Prozessen für performante Abfragen (~3k/s auf PC) und Visualisierung der Ergebnisse.
+      Entwicklung von ETL-Prozessen für performante Abfragen und Visualisierung der Ergebnisse.
     skills:
       - Python
       - PostgreSQL
@@ -161,6 +163,9 @@ experience:
       - SQL
       - Tuning
       - ETL-Prozesse
+      - Jira
+      - Confluence
+
 
   - role: "Support Engineer"
     project: "Second-Level Support (Telekom)"
@@ -202,6 +207,8 @@ experience:
     skills:
       - Java
       - Oracle
+      - SQL
+      - PL/SQL
       - Datenmodellierung,
       - PL/SQL-Entwicklung,
       - Datenbankadministration
@@ -229,6 +236,7 @@ experience:
       Datenbankadministration der Entwicklungs- und Testdatenbank.
     skills:
       - Oracle
+      - SQL
       - PL/SQL
       - Datenbankoptimierung
       - ETL-Prozesse
@@ -254,6 +262,8 @@ experience:
       - XML aus verschiedenen Schnittstellen
       - Eclipse/STS,
       - svn, git
+      - Oracle
+      - SQL
       - SQL-Developer
       - PL/SQL
       - Liquibase
@@ -268,6 +278,7 @@ experience:
       Entwickler mit Schwerpunkt PL/SQL; XDB mit oop; Prozess-Automatisierung und PerformanceTuning
       Projektbezeichnungen: OPUS; Wall-E; Migration CRM-T Stufe3/4; Migration CRM-T Stufe2
     skills:
+      - Oracle
       - SQL
       - PL/SQL
       - JAVA
