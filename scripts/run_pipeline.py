@@ -277,6 +277,15 @@ def rank(cv_path, db_url, top, log_level):
                 project_contract=proj.contract_type,
             )
             scored_list.append(scored)
+            save_match_result(
+                session,
+                project_id=proj.project_id,
+                score=scored.score,
+                matched_skills=scored.matched_skills,
+                missing_skills=scored.missing_skills,
+                notes=scored.exclude_reason if scored.excluded else "",
+            )
+        session.commit()
 
         ranked = rank_projects(scored_list)
         _print_ranking(ranked[:top], all_projects)
