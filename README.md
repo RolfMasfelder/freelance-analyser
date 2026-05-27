@@ -91,6 +91,22 @@ python scripts/export_cookies.py
 # → Speichert nach data/cookies/freelancermap.json
 ```
 
+### CV aus ODT-Datei erzeugen
+
+```bash
+# Lebenslauf (ODT) per LLM analysieren und data/cv.yaml erzeugen
+# Auf dem HOST ausführen (liest LLM_BASE_URL / LLM_API_KEY / LLM_MODEL aus .env)
+python scripts/extract_cv.py data/mein-lebenslauf.odt
+
+# Nur anzeigen, nicht schreiben
+python scripts/extract_cv.py data/mein-lebenslauf.odt --dry-run
+
+# Alternativer Ausgabepfad
+python scripts/extract_cv.py data/mein-lebenslauf.odt -o data/cv_neu.yaml
+```
+
+> Das Script liest den Volltext aus der ODT-Datei, sendet ihn an das konfigurierte LLM und schreibt strukturiertes YAML mit Skills, Projekterfahrungen und Präferenzen direkt nach `data/cv.yaml`.
+
 ## Konfiguration (`.env`)
 
 | Variable | Beschreibung |
@@ -126,5 +142,7 @@ src/
 ├── letter_generator.py — Antwortschreiben per LLM (OpenAI-kompatibel)
 └── web.py              — FastAPI-Web-UI
 scripts/
-└── run_pipeline.py     — CLI-Einstiegspunkt (Click)
+├── run_pipeline.py     — CLI-Einstiegspunkt (Click)
+├── export_cookies.py   — Firefox-Cookies für freelancermap.de exportieren (HOST)
+└── extract_cv.py       — Lebenslauf (ODT) per LLM in data/cv.yaml konvertieren
 ```
