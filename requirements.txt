@@ -127,7 +127,7 @@ pytest==9.0.2
     #   pytest-cov
 pytest-asyncio==1.3.0
     # via -r requirements.in
-pytest-cov==7.0.0
+pytest-cov==7.1.0
     # via -r requirements.in
 python-dotenv==1.2.2
     # via
