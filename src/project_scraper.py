@@ -36,10 +36,21 @@ def scrape_project_page(
     if cookies is None:
         cookies = get_authenticated_cookies()
 
-    with httpx.Client(
-        cookies=cookies, follow_redirects=False, timeout=timeout
-    ) as client:
-        resp = client.get(url)
+    last_exc: Exception | None = None
+    for attempt in range(3):
+        if attempt > 0:
+            logger.warning("Retry %d/2 für %s", attempt, url)
+            time.sleep(3.0 * attempt)
+        try:
+            with httpx.Client(
+                cookies=cookies, follow_redirects=False, timeout=timeout
+            ) as client:
+                resp = client.get(url)
+            break
+        except httpx.TransportError as exc:
+            last_exc = exc
+    else:
+        raise last_exc
 
     if resp.status_code in (301, 302):
         location = resp.headers.get("location", "")
