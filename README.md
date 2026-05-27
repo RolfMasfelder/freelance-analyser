@@ -1,6 +1,39 @@
 # Freelance-Analyser
 
-Automatisierte Pipeline zur Überwachung von Freelance-Projekten auf freelancermap.de mit CV-basiertem Matching und Ranking.
+Automatisierte Pipeline zur Überwachung von Freelance-Projekten auf freelancermap.de: E-Mails abholen, Projekte scrapen, CV-basiertes Matching, Rangliste — und per Klick ein Bewerbungsschreiben per LLM generieren.
+
+## Was es kann
+
+- **Automatisches Monitoring**: Ruft Projekt-E-Mails via IMAP ab und scrapt die Detailseiten von freelancermap.de (mit Cookie-Authentifizierung)
+- **CV-Matching**: Gleicht Projekt-Skills gegen das eigene CV ab (exakter + Fuzzy-Match), berechnet einen Relevanz-Score
+- **Ausschlussfilter**: Definierbare Skills und Branchen, die automatisch aus der Rangliste herausgefiltert werden
+- **Web-UI**: Browser-basierte Rangliste mit Statusverwaltung und Detailansicht
+- **Antwortschreiben per LLM**: Ein-Klick-Generierung eines individuellen Bewerbungsschreibens auf Basis des CVs und der Projektanforderungen (OpenAI-kompatible API)
+
+## Web-UI
+
+```bash
+docker compose up -d       # Alle Container starten (einmalig)
+# → http://localhost:8080
+```
+
+### Rangliste (`/`)
+
+Zeigt alle gematchten Projekte sortiert nach Relevanz-Score:
+
+- **Statusfilter**: `neu` / `gesehen` / `beworben` / `abgelehnt` / `alle`
+- **Altersfilter**: Standardmäßig nur Projekte der letzten 30 Tage (`?include_old=true` für alle)
+- **Top-N**: Anzahl konfigurierbar via `?top=N` (max. 500)
+
+### Projektdetail (`/project/<id>`)
+
+Zeigt Projektbeschreibung, geforderte Skills, gematchte und fehlende CV-Skills.
+
+- **Status setzen**: Projekt direkt als `gesehen`, `beworben` oder `abgelehnt` markieren
+- **Antwortschreiben generieren**: Klick auf „Antwortschreiben generieren" erstellt per LLM ein individuelles Bewerbungsschreiben
+  - Sprache wird automatisch aus der Projektausschreibung erkannt (Deutsch/Englisch)
+  - Nur tatsächlich vorhandene Erfahrungen aus dem CV fließen ein (keine Halluzinationen durch strikten Prompt)
+  - Genutztes Modell wird angezeigt (konfigurierbar via `LLM_MODEL` in `.env`)
 
 ## Pipeline
 
@@ -8,84 +41,74 @@ Automatisierte Pipeline zur Überwachung von Freelance-Projekten auf freelancerm
 E-Mail abholen → Parsen → Links extrahieren → Scrapen → DB speichern → CV-Matching → Rangliste
 ```
 
-## Voraussetzungen
-
-- Docker + Docker Compose
-- Firefox (für Cookie-Extraktion von freelancermap.de)
-- mbox-Datei mit Projekt-E-Mails (Export aus E-Mail-Client)
-
-## Setup
-
 ```bash
-# 1. Repository klonen
-git clone <repo-url> && cd freelance-analyser
-
-# 2. .env anlegen
-cp .env.example .env
-# → Zugangsdaten eintragen (DB, IMAP, Freelancermap)
-
-# 3. CV vorbereiten
-# data/cv.yaml mit eigenen Skills/Präferenzen befüllen (siehe data/cv.yaml als Vorlage)
-
-# 4. Container starten
-docker compose build freelance-analyser  # App-Image bauen
-docker compose up -d                     # Alle Container starten
-```
-
-## Benutzung
-
-Alle Befehle werden über Docker Compose ausgeführt (Container muss laufen):
-
-```bash
-# Hilfe anzeigen
-docker compose exec freelance-analyser python scripts/run_pipeline.py --help
-
-# Cookies exportieren (auf dem HOST, nicht im Container!)
-# → Benötigt Firefox mit gültiger freelancermap.de-Session
-# → Speichert Cookies nach data/cookies/freelancermap.json
-python scripts/export_cookies.py
-
-# Neue E-Mails via IMAP abholen → scrapen → DB → Match → Rank (Standard)
+# Neue E-Mails via IMAP abholen → scrapen → matchen → ranken (Standard)
 docker compose exec freelance-analyser python scripts/run_pipeline.py run
 
-# Ohne Live-Scraping (nur E-Mail-Basisdaten + gecachte HTML-Dateien)
+# Ohne Live-Scraping (gecachte HTML-Dateien nutzen)
 docker compose exec freelance-analyser python scripts/run_pipeline.py run --no-scrape
 
-# Mit eigener CV-Datei (Standard: data/cv.yaml)
-docker compose exec freelance-analyser python scripts/run_pipeline.py run \
-    --cv data/cv.yaml
-
-# Alternativ: Lokale mbox-Datei verarbeiten (kein IMAP)
+# Lokale mbox-Datei statt IMAP
 docker compose exec freelance-analyser python scripts/run_pipeline.py run \
     --no-imap --mbox "data/raw_emails/meine-mails.mbox"
 
-# Nur Ranking auf bereits gespeicherte Projekte
+# Nur Ranking neu berechnen (ohne E-Mail-Abruf)
 docker compose exec freelance-analyser python scripts/run_pipeline.py rank --top 10
 ```
+
+## Setup
+
+### Voraussetzungen
+
+- Docker + Docker Compose
+- Firefox (für Cookie-Extraktion von freelancermap.de)
+- OpenAI-kompatibler API-Endpunkt (für Antwortschreiben, z. B. OpenAI, Ollama, LM Studio)
+
+### Installation
+
+```bash
+# 1. Repository klonen
+git clone https://github.com/RolfMasfelder/freelance-analyser.git
+cd freelance-analyser
+
+# 2. .env anlegen
+cp .env.example .env
+# → Zugangsdaten eintragen (DB, IMAP, LLM-API)
+
+# 3. CV befüllen
+# data/cv.yaml mit eigenen Skills, Erfahrungen und Präferenzen anpassen
+
+# 4. Container bauen und starten
+docker compose build freelance-analyser
+docker compose up -d
+```
+
+### Cookies exportieren (einmalig, auf dem HOST)
+
+```bash
+# Benötigt Firefox mit aktiver freelancermap.de-Session
+python scripts/export_cookies.py
+# → Speichert nach data/cookies/freelancermap.json
+```
+
+## Konfiguration (`.env`)
+
+| Variable | Beschreibung |
+|---|---|
+| `DATABASE_URL` | PostgreSQL-Verbindung |
+| `IMAP_HOST` / `IMAP_USER` / `IMAP_PASSWORD` | E-Mail-Zugang |
+| `FREELANCERMAP_COOKIE_BROWSER` | Browser für Cookie-Extraktion (`firefox`) |
+| `LLM_BASE_URL` | API-Endpunkt (OpenAI-kompatibel) |
+| `LLM_API_KEY` | API-Key |
+| `LLM_MODEL` | Modellname, z. B. `gpt-4o-mini`, `llama3` |
+| `CV_PATH` | Pfad zur CV-Datei (Standard: `data/cv.yaml`) |
+| `LOG_LEVEL` | Logging-Level (`INFO`, `DEBUG`, …) |
 
 ## Tests
 
 ```bash
 docker compose exec freelance-analyser python -m pytest tests/ -v
 ```
-
-## Web-UI
-
-Das Frontend zeigt die Rangliste und Projektdetails im Browser.
-
-```bash
-# Web-Container starten (nur einmalig nötig, läuft dann dauerhaft)
-docker compose up -d web
-
-# → http://localhost:8080
-```
-
-| Route | Beschreibung |
-|---|---|
-| `/` | Rangliste (Top 50, konfigurierbar via `?top=N`, max. 500) |
-| `/project/<id>` | Projektdetail: Infos, geforderte Skills, CV-Match |
-
-Die Anzeige basiert auf den in der DB gespeicherten Match-Ergebnissen — zuerst die Pipeline ausführen (`run_pipeline.py run`), dann das Frontend öffnen.
 
 ## Projektstruktur
 
@@ -94,23 +117,14 @@ src/
 ├── email_fetcher.py    — IMAP-Abruf
 ├── email_parser.py     — E-Mail parsen, Links extrahieren
 ├── cookie_manager.py   — Browser-Cookies auslesen
-├── project_scraper.py  — Projektseiten scrapen (authentifiziert)
+├── project_scraper.py  — Projektseiten scrapen (authentifiziert, mit Retry)
 ├── project_parser.py   — HTML → strukturierte Projektdaten
 ├── database.py         — SQLAlchemy-Models, PostgreSQL-Zugriff
 ├── cv_manager.py       — Lebenslauf laden (YAML)
 ├── matcher.py          — Skill-Abgleich (exakt + fuzzy)
-└── scoring.py          — Relevanz-Score & Ranking
+├── scoring.py          — Relevanz-Score & Ranking
+├── letter_generator.py — Antwortschreiben per LLM (OpenAI-kompatibel)
+└── web.py              — FastAPI-Web-UI
 scripts/
 └── run_pipeline.py     — CLI-Einstiegspunkt (Click)
 ```
-
-## Konfiguration
-
-Alle Einstellungen über `.env` (siehe `.env.example`):
-
-| Variable | Beschreibung |
-|---|---|
-| `DATABASE_URL` | PostgreSQL-Verbindung |
-| `IMAP_HOST/USER/PASSWORD` | E-Mail-Zugang |
-| `FREELANCERMAP_COOKIE_BROWSER` | Browser für Cookie-Extraktion (`firefox`) |
-| `LOG_LEVEL` | Logging-Level (`INFO`, `DEBUG`, …) |

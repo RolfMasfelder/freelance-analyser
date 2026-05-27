@@ -1,0 +1,44 @@
+name: Bug Report
+description: Fehler im Freelance-Analyser melden
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Bitte fülle das Formular so vollständig wie möglich aus.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Beschreibung
+      description: Was ist passiert? Was hast du erwartet?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zur Reproduktion
+      placeholder: |
+        1. docker compose exec freelance-analyser python scripts/run_pipeline.py run
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Fehlermeldung / Logs
+      description: Relevante Log-Ausgaben oder Tracebacks
+      render: text
+
+  - type: input
+    id: python
+    attributes:
+      label: Python-Version
+      placeholder: "3.13"
+
+  - type: input
+    id: os
+    attributes:
+      label: Betriebssystem
+      placeholder: "Ubuntu 24.04 / macOS 15 / ..."
