@@ -104,13 +104,13 @@ psycopg-binary==3.3.3
     # via psycopg
 pycryptodomex==3.23.0
     # via browser-cookie3
-pydantic==2.12.5
+pydantic==2.13.4
     # via
     #   -r requirements.in
     #   fastapi
     #   openai
     #   pydantic-settings
-pydantic-core==2.41.5
+pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.13.1
     # via -r requirements.in
