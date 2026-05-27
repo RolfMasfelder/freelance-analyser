@@ -26,7 +26,7 @@ certifi==2026.2.25
     # via
     #   httpcore
     #   httpx
-click==8.3.1
+click==8.4.1
     # via
     #   -r requirements.in
     #   pip-tools
@@ -104,13 +104,13 @@ psycopg-binary==3.3.3
     # via psycopg
 pycryptodomex==3.23.0
     # via browser-cookie3
-pydantic==2.12.5
+pydantic==2.13.4
     # via
     #   -r requirements.in
     #   fastapi
     #   openai
     #   pydantic-settings
-pydantic-core==2.41.5
+pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.13.1
     # via -r requirements.in
@@ -127,14 +127,14 @@ pytest==9.0.2
     #   pytest-cov
 pytest-asyncio==1.3.0
     # via -r requirements.in
-pytest-cov==7.0.0
+pytest-cov==7.1.0
     # via -r requirements.in
 python-dotenv==1.2.2
     # via
     #   -r requirements.in
     #   pydantic-settings
     #   uvicorn
-python-multipart==0.0.26
+python-multipart==0.0.29
     # via -r requirements.in
 pyyaml==6.0.3
     # via
@@ -175,7 +175,7 @@ typing-inspection==0.4.2
     #   fastapi
     #   pydantic
     #   pydantic-settings
-uvicorn[standard]==0.41.0
+uvicorn[standard]==0.48.0
     # via -r requirements.in
 uvloop==0.22.1
     # via uvicorn
