@@ -18,9 +18,9 @@ class MatchDetail:
     """Ergebnis eines Projekt-CV-Abgleichs."""
 
     project_id: int
-    matched_skills: list[str] = field(default_factory=list)
-    missing_skills: list[str] = field(default_factory=list)
-    matched_keywords: list[str] = field(default_factory=list)
+    matched_skills: list[str] = field(default_factory=list[str])
+    missing_skills: list[str] = field(default_factory=list[str])
+    matched_keywords: list[str] = field(default_factory=list[str])
     excluded: bool = False
     exclude_reason: str = ""
 
@@ -90,8 +90,8 @@ def match_skills(
         (matched, missing) — gematchte und fehlende CV-Skills.
     """
     proj_lower = [_normalize(s) for s in project_skills]
-    matched = []
-    missing = []
+    matched: list[str] = []
+    missing: list[str] = []
 
     for skill in cv.all_skills:
         # Exakter Match
@@ -102,7 +102,6 @@ def match_skills(
         fuzzy_hit = _fuzzy_match(skill, proj_lower)
         if fuzzy_hit:
             matched.append(skill)
-            continue
 
     # Missing = Projekt-Skills die nicht im CV sind
     cv_all_lower = cv.all_skills
@@ -120,7 +119,7 @@ def find_keywords(cv: CVProfile, description: str) -> list[str]:
         Liste der gefundenen Keywords.
     """
     desc_lower = _normalize(description)
-    found = []
+    found: list[str] = []
     for kw in cv.keywords:
         if kw in desc_lower:
             found.append(kw)
