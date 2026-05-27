@@ -5,7 +5,6 @@ import logging
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    Column,
     DateTime,
     Enum,
     Float,
@@ -16,7 +15,7 @@ from sqlalchemy import (
     create_engine,
     func,
 )
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 logger = logging.getLogger(__name__)
 
@@ -39,29 +38,31 @@ class Project(Base):
 
     __tablename__ = "projects"
 
-    project_id = Column(Integer, primary_key=True)
-    title = Column(String(500), nullable=False, default="")
-    description = Column(Text, nullable=False, default="")
-    company = Column(String(300), nullable=False, default="")
-    contact = Column(String(300), nullable=False, default="")
-    location = Column(String(300), nullable=False, default="")
-    country = Column(String(100), nullable=False, default="")
-    industry = Column(String(300), nullable=False, default="")
-    remote = Column(String(100), nullable=False, default="")
-    contract_type = Column(String(100), nullable=False, default="")
-    start = Column(String(100), nullable=False, default="")
-    duration = Column(String(100), nullable=False, default="")
-    utilization = Column(String(100), nullable=False, default="")
-    skills = Column(JSON, nullable=False, default=list)
-    language = Column(String(10), nullable=False, default="de")
-    url = Column(String(500), nullable=False, default="")
-    status = Column(Enum(ProjectStatus), nullable=False, default=ProjectStatus.neu)
-    first_seen = Column(
+    project_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    company: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    contact: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    location: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    country: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    industry: Mapped[str] = mapped_column(String(300), nullable=False, default="")
+    remote: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    contract_type: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    start: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    duration: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    utilization: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    skills: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    language: Mapped[str] = mapped_column(String(10), nullable=False, default="de")
+    url: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    status: Mapped[ProjectStatus] = mapped_column(
+        Enum(ProjectStatus), nullable=False, default=ProjectStatus.neu
+    )
+    first_seen: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
     )
-    last_seen = Column(
+    last_seen: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
@@ -73,13 +74,17 @@ class MatchResult(Base):
 
     __tablename__ = "match_results"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    project_id = Column(Integer, nullable=False, index=True)
-    score = Column(Float, nullable=False, default=0.0)
-    matched_skills = Column(JSON, nullable=False, default=list)
-    missing_skills = Column(JSON, nullable=False, default=list)
-    notes = Column(Text, nullable=False, default="")
-    created_at = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    project_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    matched_skills: Mapped[list[str]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    missing_skills: Mapped[list[str]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=lambda: datetime.now(timezone.utc),
