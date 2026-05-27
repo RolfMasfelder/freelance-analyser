@@ -78,7 +78,7 @@ def run(cv_path, mbox_path, imap, scrape, db_url, top, log_level):
     """Führt die komplette Pipeline aus: Parse → Scrape → DB → Match → Rank."""
     _setup_logging(log_level)
     logger = logging.getLogger("pipeline")
-    settings = Settings()
+    settings = Settings()  # type: ignore[call-arg]
 
     db_url = db_url or settings.database_url
     engine = get_engine(db_url)
@@ -112,7 +112,7 @@ def _phase_fetch_emails(imap: bool, mbox_path, settings, logger) -> list:
     return projects
 
 
-def _phase_scrape(scrape: bool, projects_from_email: list, logger) -> list:
+def _phase_scrape(scrape: bool, projects_from_email: list, logger) -> list:  # NOSONAR
     """Phase 2: Projektseiten scrapen oder gecachte HTML-Dateien laden."""
     scraped_details = []
     if scrape and projects_from_email:
@@ -246,7 +246,7 @@ def _phase_match_and_score(
 def rank(cv_path, db_url, top, log_level):
     """Matching & Ranking auf bereits gespeicherte Projekte anwenden."""
     _setup_logging(log_level)
-    settings = Settings()
+    settings = Settings()  # type: ignore[call-arg]
 
     db_url = db_url or settings.database_url
     engine = get_engine(db_url)
@@ -296,7 +296,9 @@ def rank(cv_path, db_url, top, log_level):
         session.close()
 
 
-def _print_ranking(ranked, all_projects, new_project_ids: set[int] | None = None):
+def _print_ranking(
+    ranked, all_projects, new_project_ids: set[int] | None = None
+):  # NOSONAR
     """Gibt die Rangliste formatiert aus."""
     projects_by_id = {p.project_id: p for p in all_projects}
     new_ids = new_project_ids or set()
