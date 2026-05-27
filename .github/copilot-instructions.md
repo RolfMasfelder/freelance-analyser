@@ -34,7 +34,12 @@ Email-Fetch → Email-Parse → Link-Extract → Scrape (mit Cookies) → Parse 
 ## Git Remotes
 - `origin` → Local mirror (NO CI)
 - `github` → Github mirror (→ PRs, Issues, CI)
-- always push to both remotes: `git push origin main && git push github main`
+- always push to both remotes: `git push origin dev && git push github dev`
+
+## Git Workflow
+- Work on `dev` branch only. NEVER push directly to `main`.
+- Merge to `main` exclusively via Pull Request on GitHub (also applies to repo owner).
+- After merging a PR: `git checkout main && git pull github main && git push origin main && git checkout dev && git merge main && git push origin dev && git push github dev`
 
 
 ## Documentation (if needed)
