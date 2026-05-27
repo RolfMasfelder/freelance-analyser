@@ -9,6 +9,9 @@ venv/
 .venv/
 .env
 *.db
+data/cv*.yaml
+data/cv*.bak*
+data/*.odt
 data/raw_emails/*
 data/cookies/*
 data/projects/*
