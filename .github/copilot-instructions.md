@@ -3,10 +3,10 @@
 ## Critical Rules
 
 **Development with Python 3.13**: Use Python 3.13 syntax and libraries only
-**Tests required**: ALL features/bugfixes MUST have tests (unit + integration)
-**Development with venv**: Use virtual environment for local dev (python -m venv venv). Any new Terminal must use `source venv/bin/activate` before running Python commands. DO NOT install packages globally.
-**Git Commits**: Keep messages concise (feat/fix/refactor format). NO long descriptions. Only one line as commit-message
-**Always use Docker**: ALL commands via `docker compose exec freelance-analyser ...` (Container must be running). DO NOT run Python scripts directly on host.
+**Tests required**: Every feature or bugfix MUST include at least one unit test; integration tests are required when the change affects module boundaries (DB, HTTP, IMAP). Run tests via `docker compose exec freelance-analyser pytest tests/`. Minimum 80% coverage on new code.
+**Always use Docker**: ALL commands via `docker compose exec freelance-analyser ...`. DO NOT run Python scripts directly on the host. If the container is not running, start it first with `docker compose up -d`.
+**Git Commits**: Use Conventional Commits format: `<type>: <subject>` where type ∈ {feat, fix, refactor, chore, docs, test}. Single line, max 72 chars, no body.
+**Language**: Code, comments, and docstrings in English. Commit messages in English. User-facing CLI output in German.
 
 ## Architecture Basics
 
@@ -35,14 +35,21 @@ Email-Fetch → Email-Parse → Link-Extract → Scrape (mit Cookies) → Parse 
 - `origin` → Local mirror (NO CI)
 - `github` → Github mirror (→ PRs, Issues, CI)
 - always push to both remotes: `git push origin dev && git push github dev`
+- If pushing to one remote fails, report the failure explicitly — do not consider the operation complete until both remotes are in sync.
 
 ## Git Workflow
 - Work on `dev` branch only. NEVER push directly to `main`.
 - Merge to `main` exclusively via Pull Request on GitHub (also applies to repo owner).
-- After merging a PR: `git checkout main && git pull github main && git push origin main && git checkout dev && git merge main && git push origin dev && git push github dev`
+- After merging a PR, run these steps in order:
+  1. `git checkout main`
+  2. `git pull github main`
+  3. `git push origin main`
+  4. `git checkout dev`
+  5. `git merge main` — if conflicts occur, stop and request user guidance; do not auto-resolve or force-push
+  6. `git push origin dev && git push github dev`
 
 
 ## Documentation (if needed)
-- Check `TODO.md` if needed
+- Consult `TODO.md` before starting any new feature or when the user references pending work.
 - Use `docs/` folder for additional docs
 - Use `scripts/` folder for additional shell scripts
