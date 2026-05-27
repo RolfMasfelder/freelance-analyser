@@ -85,7 +85,7 @@ numpy==2.4.3
     #   scipy
 odfpy==1.4.1
     # via -r requirements.in
-openai==2.28.0
+openai==2.38.0
     # via -r requirements.in
 packaging==26.0
     # via
