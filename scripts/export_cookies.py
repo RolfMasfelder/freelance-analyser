@@ -10,6 +10,9 @@ Verwendung:
 
 import logging
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.cookie_manager import (
     export_cookies_to_file,
