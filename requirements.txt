@@ -16,7 +16,7 @@ anyio==4.12.1
     #   openai
     #   starlette
     #   watchfiles
-beautifulsoup4==4.14.3
+beautifulsoup4==4.15.0
     # via -r requirements.in
 browser-cookie3==0.20.1
     # via -r requirements.in
