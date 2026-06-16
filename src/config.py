@@ -17,8 +17,9 @@ class Settings(BaseSettings):
     imap_host: str
     imap_user: str
     imap_password: str
-    imap_port: int = 993
-    imap_ssl: bool = True
+    imap_port: int = 143
+    imap_ssl: bool = False
+    imap_starttls: bool = True
 
     # Freelancermap
     freelancermap_cookie_browser: str = "firefox"
