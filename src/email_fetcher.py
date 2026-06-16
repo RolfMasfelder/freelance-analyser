@@ -79,6 +79,8 @@ def fetch_emails(
         ssl=settings.imap_ssl,
         timeout=30,
     ) as client:
+        if getattr(settings, "imap_starttls", False) and not settings.imap_ssl:
+            client.starttls()
         client.login(settings.imap_user, settings.imap_password)
         client.select_folder(folder, readonly=not mark_seen)
 
@@ -125,6 +127,8 @@ def list_folders(settings: Settings | None = None) -> list[str]:
         ssl=settings.imap_ssl,
         timeout=30,
     ) as client:
+        if getattr(settings, "imap_starttls", False) and not settings.imap_ssl:
+            client.starttls()
         client.login(settings.imap_user, settings.imap_password)
         folders = client.list_folders()
         return [folder_name for _flags, _delimiter, folder_name in folders]
