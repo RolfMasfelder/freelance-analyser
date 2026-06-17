@@ -37,7 +37,7 @@ defusedxml==0.7.1
     # via odfpy
 distro==1.9.0
     # via openai
-fastapi==0.136.3
+fastapi==0.137.1
     # via -r requirements.in
 greenlet==3.3.2
     # via sqlalchemy
