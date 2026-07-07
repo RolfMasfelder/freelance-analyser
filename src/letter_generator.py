@@ -21,7 +21,7 @@ def _language_label(code: str) -> str:
 
 
 SYSTEM_PROMPT = """\
-Du bist ein erfahrener Freelance-Berater, der professionelle Antwortschreiben \
+Du bist ein erfahrener Freelancer-Berater, der professionelle Antwortschreiben \
 auf Projektausschreibungen verfasst. Du schreibst sachlich und \
 überzeugend. Das Schreiben soll:
 - Die relevanten Skills und Erfahrungen des Freelancers hervorheben, \
