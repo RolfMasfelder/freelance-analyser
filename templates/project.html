@@ -144,41 +144,94 @@
     <div class="card shadow-sm mt-3">
       <div class="card-header fw-semibold">Antwortschreiben</div>
       <div class="card-body">
-        {% if letter_error is defined and letter_error %}
-          <div class="alert alert-danger mb-3">
-            <strong>Fehler:</strong> {{ letter_error }}
-          </div>
-        {% endif %}
+        <div id="letter-error" class="alert alert-danger mb-3 d-none"></div>
 
-        {% if letter is defined and letter %}
+        <div id="letter-result" class="d-none">
           <div class="mb-2">
-            <small class="text-muted">Modell: {{ letter_model }}</small>
+            <small class="text-muted">Modell: <span id="letter-model"></span></small>
           </div>
-          <div class="border rounded p-3 bg-light" style="white-space: pre-wrap;">{{ letter }}</div>
+          <div class="border rounded p-3 bg-light" id="letter-output" style="white-space: pre-wrap;"></div>
           <div class="mt-2">
-            <button class="btn btn-sm btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById('letter-text').innerText)">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-copy">
               Kopieren
             </button>
           </div>
-          <div id="letter-text" class="d-none">{{ letter }}</div>
-        {% else %}
-          <p class="text-muted small mb-3">
-            Generiert ein Antwortschreiben auf Basis deines CVs und der Projektanforderungen per LLM.
-          </p>
-          <form method="post" action="/project/{{ project.project_id }}/letter">
-            <button type="submit" class="btn btn-primary" id="btn-generate">
-              <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></span>
-              Antwortschreiben generieren
-            </button>
-          </form>
-          <script>
-            document.getElementById('btn-generate').addEventListener('click', function() {
-              this.disabled = true;
-              document.getElementById('spinner').classList.remove('d-none');
-              this.closest('form').submit();
+        </div>
+
+        <p class="text-muted small mb-3" id="letter-hint">
+          Generiert ein Antwortschreiben auf Basis deines CVs und der Projektanforderungen per LLM.
+          Kann bei lokalen LLMs mehrere Minuten dauern.
+        </p>
+        <button type="button" class="btn btn-primary" id="btn-generate">
+          <span class="spinner-border spinner-border-sm d-none" id="spinner" role="status"></span>
+          Antwortschreiben generieren
+        </button>
+        <script>
+          (function () {
+            var projectId = {{ project.project_id }};
+            var btn = document.getElementById('btn-generate');
+            var spinner = document.getElementById('spinner');
+            var hint = document.getElementById('letter-hint');
+            var errorBox = document.getElementById('letter-error');
+            var resultBox = document.getElementById('letter-result');
+            var modelSpan = document.getElementById('letter-model');
+            var outputDiv = document.getElementById('letter-output');
+
+            function showError(message) {
+              btn.disabled = false;
+              spinner.classList.add('d-none');
+              errorBox.textContent = 'Fehler: ' + message;
+              errorBox.classList.remove('d-none');
+            }
+
+            // Kurzes Polling statt eines einzelnen, minutenlang offenen
+            // HTTP-Requests: NAT-Router/Firewalls kappen idle TCP-Verbindungen
+            // ohne Datenfluss oft nach wenigen Minuten, sodass der Browser sonst
+            // nie eine Antwort erhalten würde, selbst wenn das LLM längst
+            // fertig war.
+            function poll(jobId) {
+              fetch('/project/' + projectId + '/letter/status/' + jobId)
+                .then(function (r) { return r.json(); })
+                .then(function (job) {
+                  if (job.status === 'pending') {
+                    setTimeout(function () { poll(jobId); }, 3000);
+                    return;
+                  }
+                  if (job.status === 'done') {
+                    btn.disabled = false;
+                    spinner.classList.add('d-none');
+                    hint.classList.add('d-none');
+                    btn.classList.add('d-none');
+                    modelSpan.textContent = job.model;
+                    outputDiv.textContent = job.letter;
+                    resultBox.classList.remove('d-none');
+                  } else {
+                    showError(job.error || 'Unbekannter Fehler');
+                  }
+                })
+                .catch(function (err) { showError(err); });
+            }
+
+            btn.addEventListener('click', function () {
+              btn.disabled = true;
+              spinner.classList.remove('d-none');
+              errorBox.classList.add('d-none');
+              fetch('/project/' + projectId + '/letter/start', { method: 'POST' })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                  if (!data.job_id) {
+                    throw new Error(data.error || 'Unbekannter Fehler');
+                  }
+                  poll(data.job_id);
+                })
+                .catch(function (err) { showError(err); });
             });
-          </script>
-        {% endif %}
+
+            document.getElementById('btn-copy').addEventListener('click', function () {
+              navigator.clipboard.writeText(outputDiv.textContent);
+            });
+          })();
+        </script>
       </div>
     </div>
   </div>

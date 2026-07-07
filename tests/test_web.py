@@ -1,5 +1,6 @@
 """Tests für src/web.py — FastAPI Web-UI."""
 
+import time
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
@@ -71,6 +72,18 @@ def _add_project_with_match(session, score: float = 75.0) -> Project:
     session.add(match)
     session.commit()
     return proj
+
+
+def _wait_for_job(client, project_id: int, job_id: str, timeout: float = 2.0) -> dict:
+    """Pollt den Job-Status, bis er nicht mehr 'pending' ist (Hintergrund-Thread)."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        response = client.get(f"/project/{project_id}/letter/status/{job_id}")
+        job = response.json()
+        if job["status"] != "pending":
+            return job
+        time.sleep(0.02)
+    raise AssertionError("Job wurde nicht rechtzeitig fertig")
 
 
 class TestRankingPage:
@@ -156,39 +169,60 @@ class TestProjectDetailPage:
 class TestLetterGeneration:
     @patch("src.web.generate_letter")
     @patch("src.web.load_cv")
-    def test_post_letter_returns_200(self, mock_cv, mock_gen, client, db_session):
+    def test_start_returns_job_id(self, mock_cv, mock_gen, client, db_session):
         _add_project_with_match(db_session)
         mock_cv.return_value = MagicMock()
         mock_gen.return_value = LetterResult(
             letter="Sehr geehrte Damen und Herren...",
             model="llama3.1:8b",
         )
-        response = client.post("/project/1001/letter")
+        response = client.post("/project/1001/letter/start")
         assert response.status_code == 200
-        assert "Sehr geehrte Damen und Herren" in response.text
+        assert "job_id" in response.json()
 
     @patch("src.web.generate_letter")
     @patch("src.web.load_cv")
-    def test_post_letter_shows_model(self, mock_cv, mock_gen, client, db_session):
+    def test_status_shows_completed_letter(self, mock_cv, mock_gen, client, db_session):
+        _add_project_with_match(db_session)
+        mock_cv.return_value = MagicMock()
+        mock_gen.return_value = LetterResult(
+            letter="Sehr geehrte Damen und Herren...",
+            model="llama3.1:8b",
+        )
+        job_id = client.post("/project/1001/letter/start").json()["job_id"]
+        job = _wait_for_job(client, 1001, job_id)
+        assert job["status"] == "done"
+        assert "Sehr geehrte Damen und Herren" in job["letter"]
+
+    @patch("src.web.generate_letter")
+    @patch("src.web.load_cv")
+    def test_status_shows_model(self, mock_cv, mock_gen, client, db_session):
         _add_project_with_match(db_session)
         mock_cv.return_value = MagicMock()
         mock_gen.return_value = LetterResult(letter="Text", model="test-model")
-        response = client.post("/project/1001/letter")
-        assert "test-model" in response.text
+        job_id = client.post("/project/1001/letter/start").json()["job_id"]
+        job = _wait_for_job(client, 1001, job_id)
+        assert job["model"] == "test-model"
 
     @patch(
         "src.web.generate_letter", side_effect=ConnectionError("LLM nicht erreichbar")
     )
     @patch("src.web.load_cv")
-    def test_post_letter_error_shown(self, mock_cv, mock_gen, client, db_session):
+    def test_status_shows_error(self, mock_cv, mock_gen, client, db_session):
         _add_project_with_match(db_session)
         mock_cv.return_value = MagicMock()
-        response = client.post("/project/1001/letter")
-        assert response.status_code == 200
-        assert "LLM nicht erreichbar" in response.text
+        job_id = client.post("/project/1001/letter/start").json()["job_id"]
+        job = _wait_for_job(client, 1001, job_id)
+        assert job["status"] == "error"
+        assert "LLM nicht erreichbar" in job["error"]
 
-    def test_post_letter_nonexistent_project(self, client):
-        response = client.post("/project/9999/letter")
+    def test_start_nonexistent_project(self, client):
+        response = client.post("/project/9999/letter/start")
+        assert response.status_code == 404
+
+    def test_status_unknown_job(self, client, db_session):
+        _add_project_with_match(db_session)
+        response = client.get("/project/1001/letter/status/unknown-job-id")
         assert response.status_code == 404
 
 
@@ -302,6 +336,57 @@ class TestAgeFilter:
         response = client.get("/")
         assert response.status_code == 200
         assert "Senior Python Entwickler" in response.text
+
+    def test_last_week_hides_projects_older_than_7_days(self, client, db_session):
+        """Mit last_week=true werden Projekte älter als 7 Tage ausgeblendet."""
+        old_date = datetime.now(UTC) - timedelta(days=10)
+        proj = Project(**SAMPLE_PROJECT, first_seen=old_date, last_seen=old_date)
+        db_session.add(proj)
+        db_session.flush()
+        match = MatchResult(
+            project_id=SAMPLE_PROJECT["project_id"],
+            score=80.0,
+            matched_skills=["Python"],
+            missing_skills=[],
+            notes="",
+            created_at=datetime.now(UTC),
+        )
+        db_session.add(match)
+        db_session.commit()
+        response = client.get("/?last_week=true")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" not in response.text
+
+    def test_last_week_shows_recent_projects(self, client, db_session):
+        """Mit last_week=true werden Projekte der letzten 7 Tage angezeigt."""
+        _add_project_with_match(db_session)
+        response = client.get("/?last_week=true")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" in response.text
+
+    def test_last_week_toggle_button_present(self, client, db_session):
+        response = client.get("/")
+        assert "last_week=true" in response.text
+
+    def test_last_week_overrides_include_old(self, client, db_session):
+        """last_week=true schränkt auch dann auf 7 Tage ein, wenn include_old gesetzt ist."""
+        old_date = datetime.now(UTC) - timedelta(days=45)
+        proj = Project(**SAMPLE_PROJECT, first_seen=old_date, last_seen=old_date)
+        db_session.add(proj)
+        db_session.flush()
+        match = MatchResult(
+            project_id=SAMPLE_PROJECT["project_id"],
+            score=80.0,
+            matched_skills=["Python"],
+            missing_skills=[],
+            notes="",
+            created_at=datetime.now(UTC),
+        )
+        db_session.add(match)
+        db_session.commit()
+        response = client.get("/?include_old=true&last_week=true")
+        assert response.status_code == 200
+        assert "Senior Python Entwickler" not in response.text
 
 
 class TestStatusFilter:

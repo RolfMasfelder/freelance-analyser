@@ -142,6 +142,15 @@ def _strip_thinking(text: str) -> str:
     return cleaned.strip()
 
 
+def _mask_api_key(key: str) -> str:
+    """Maskiert einen API-Key für Log-Ausgaben (zeigt nur die letzten 4 Zeichen)."""
+    if not key:
+        return "<leer>"
+    if len(key) <= 4:
+        return "*" * len(key)
+    return f"{'*' * (len(key) - 4)}{key[-4:]}"
+
+
 def generate_letter(
     project: Project,
     cv: CVProfile,
@@ -156,6 +165,13 @@ def generate_letter(
     if settings is None:
         settings = Settings()
 
+    log.info(
+        "LLM-Aufruf: base_url=%s model=%s api_key=%s",
+        settings.llm_base_url,
+        settings.llm_model,
+        _mask_api_key(settings.llm_api_key),
+    )
+
     client = OpenAI(
         base_url=settings.llm_base_url,
         api_key=settings.llm_api_key,
@@ -164,6 +180,7 @@ def generate_letter(
 
     user_prompt = _build_user_prompt(project, cv, matched_skills)
 
+    log.debug("Sende Chat-Completion-Request an LLM …")
     response = client.chat.completions.create(
         model=settings.llm_model,
         messages=[
@@ -178,14 +195,18 @@ def generate_letter(
         temperature=0.3,
         max_tokens=10000,
     )
+    log.debug("Chat-Completion-Request zurückgekehrt, verarbeite Antwort …")
 
     choice = response.choices[0]
     usage = response.usage
     raw_content = choice.message.content or ""
+    log.debug("Antwort verarbeitet (%d Zeichen), baue LetterResult …", len(raw_content))
 
-    return LetterResult(
+    result = LetterResult(
         letter=_strip_thinking(raw_content),
         model=response.model,
         prompt_tokens=usage.prompt_tokens if usage else None,
         completion_tokens=usage.completion_tokens if usage else None,
     )
+    log.debug("LetterResult fertig, gebe an Aufrufer zurück.")
+    return result

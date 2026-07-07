@@ -22,7 +22,7 @@ docker compose up -d       # Alle Container starten (einmalig)
 Zeigt alle gematchten Projekte sortiert nach Relevanz-Score:
 
 - **Statusfilter**: `neu` / `gesehen` / `beworben` / `abgelehnt` / `alle`
-- **Altersfilter**: Standardmäßig nur Projekte der letzten 30 Tage (`?include_old=true` für alle)
+- **Altersfilter**: Standardmäßig nur Projekte der letzten 30 Tage (`?include_old=true` für alle, `?last_week=true` für nur die letzten 7 Tage)
 - **Top-N**: Anzahl konfigurierbar via `?top=N` (max. 500)
 
 ### Projektdetail (`/project/<id>`)
@@ -31,6 +31,7 @@ Zeigt Projektbeschreibung, geforderte Skills, gematchte und fehlende CV-Skills.
 
 - **Status setzen**: Projekt direkt als `gesehen`, `beworben` oder `abgelehnt` markieren
 - **Antwortschreiben generieren**: Klick auf „Antwortschreiben generieren" erstellt per LLM ein individuelles Bewerbungsschreiben
+  - Läuft als Hintergrund-Task (Start-Request + Status-Polling alle 3s), nicht als einzelner minutenlang offener HTTP-Request — lokale LLMs können mehrere Minuten brauchen, und NAT-Router/Firewalls kappen idle TCP-Verbindungen ohne Datenfluss oft stillschweigend
   - Sprache wird automatisch aus der Projektausschreibung erkannt (Deutsch/Englisch)
   - Nur tatsächlich vorhandene Erfahrungen aus dem CV fließen ein (keine Halluzinationen durch strikten Prompt)
   - Genutztes Modell wird angezeigt (konfigurierbar via `LLM_MODEL` in `.env`)
@@ -54,6 +55,12 @@ docker compose exec freelance-analyser python scripts/run_pipeline.py run \
 
 # Nur Ranking neu berechnen (ohne E-Mail-Abruf)
 docker compose exec freelance-analyser python scripts/run_pipeline.py rank --top 10
+
+# Falls Änderungen in .env erfolgt:
+docker compose up -d --force-recreate web
+
+# Logging beobachten
+docker compose logs -f web --since 1m
 ```
 
 ## Setup

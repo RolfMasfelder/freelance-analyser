@@ -2,10 +2,15 @@
 {% block title %} — Ranking{% endblock %}
 
 {% block content %}
-{% set qs = "&include_old=true" if include_old else "" %}
+{% set qs = ("&include_old=true" if include_old else "") + ("&last_week=true" if last_week else "") %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2 class="mb-0">Top-{{ top }} Projekte</h2>
   <div class="d-flex gap-2 align-items-center">
+    {% if last_week %}
+      <a href="/?top={{ top }}&status={{ status }}" class="btn btn-sm btn-outline-warning" title="Zeitfilter zurücksetzen">Letzte Woche ausblenden</a>
+    {% else %}
+      <a href="/?top={{ top }}&status={{ status }}&last_week=true" class="btn btn-sm btn-outline-secondary" title="Nur Projekte der letzten 7 Tage">Letzte Woche</a>
+    {% endif %}
     {% if include_old %}
       <a href="/?top={{ top }}&status={{ status }}" class="btn btn-sm btn-outline-warning" title="Nur Projekte der letzten 30 Tage">Ältere ausblenden</a>
     {% else %}
