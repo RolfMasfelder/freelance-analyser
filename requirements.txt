@@ -177,7 +177,7 @@ typing-inspection==0.4.2
     #   fastapi
     #   pydantic
     #   pydantic-settings
-uvicorn[standard]==0.52.0
+uvicorn[standard]==0.52.1
     # via -r requirements.in
 uvloop==0.22.1
     # via uvicorn
