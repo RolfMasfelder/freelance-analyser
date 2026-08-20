@@ -13,6 +13,7 @@ annotated-types==0.7.0
 anyio==4.12.1
     # via
     #   httpx
+    #   httpx2
     #   openai
     #   starlette
     #   watchfiles
@@ -44,19 +45,23 @@ greenlet==3.3.2
 h11==0.16.0
     # via
     #   httpcore
+    #   httpcore2
     #   uvicorn
 httpcore==1.0.9
     # via httpx
+httpcore2==2.12.0
+    # via httpx2
 httptools==0.8.0
     # via uvicorn
 httpx==0.28.1
-    # via
-    #   -r requirements.in
-    #   openai
-idna==3.11
+    # via -r requirements.in
+httpx2==2.12.0
+    # via openai
+idna==3.19
     # via
     #   anyio
     #   httpx
+    #   httpx2
 imapclient==3.1.0
     # via -r requirements.in
 iniconfig==2.3.0
@@ -87,7 +92,7 @@ numpy==2.4.3
     #   scipy
 odfpy==1.4.1
     # via -r requirements.in
-openai==2.53.0
+openai==3.1.0
     # via -r requirements.in
 packaging==26.0
     # via
@@ -162,6 +167,10 @@ threadpoolctl==3.6.0
     # via scikit-learn
 tqdm==4.67.3
     # via openai
+truststore==0.10.4
+    # via
+    #   httpcore2
+    #   httpx2
 typing-extensions==4.15.0
     # via
     #   alembic
