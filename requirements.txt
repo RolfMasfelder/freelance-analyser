@@ -134,7 +134,7 @@ pytest-asyncio==1.4.0
     # via -r requirements.in
 pytest-cov==7.1.0
     # via -r requirements.in
-python-dotenv==1.2.2
+python-dotenv==1.2.3
     # via
     #   -r requirements.in
     #   pydantic-settings
