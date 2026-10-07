@@ -36,7 +36,7 @@ coverage[toml]==7.13.4
     # via pytest-cov
 defusedxml==0.7.1
     # via odfpy
-fastapi==0.141.1
+fastapi==0.142.2
     # via -r requirements.in
 h11==0.16.0
     # via
@@ -90,6 +90,8 @@ odfpy==1.4.1
     # via -r requirements.in
 openai==3.19.2
     # via -r requirements.in
+opentelemetry-api==1.45.1
+    # via fastapi
 packaging==26.0
     # via
     #   build
@@ -171,6 +173,7 @@ typing-extensions==4.15.0
     #   beautifulsoup4
     #   fastapi
     #   openai
+    #   opentelemetry-api
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
