@@ -117,7 +117,7 @@ pydantic==2.14.1
     #   pydantic-settings
 pydantic-core==2.50.1
     # via pydantic
-pydantic-settings==2.15.0
+pydantic-settings==2.16.0
     # via -r requirements.in
 pygments==2.19.2
     # via pytest
@@ -176,6 +176,7 @@ typing-extensions==4.16.0
     #   opentelemetry-api
     #   pydantic
     #   pydantic-core
+    #   pydantic-settings
     #   sqlalchemy
     #   typing-inspection
 typing-inspection==0.4.4
