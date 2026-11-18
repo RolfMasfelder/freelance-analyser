@@ -104,9 +104,9 @@ pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-psycopg[binary]==3.3.8
+psycopg[binary]==3.3.9
     # via -r requirements.in
-psycopg-binary==3.3.8
+psycopg-binary==3.3.9
     # via psycopg
 pycryptodomex==3.23.0
     # via browser-cookie3
